@@ -3,6 +3,8 @@
 ###############################################
 
 rm(list=ls())
+#install.packages('statmod')
+require("statmod")
 
 ##### 1. PARAMETERS #####
 
@@ -14,7 +16,6 @@ rho     <- 0.7487
 delta   <- 2.23
   
 params0 <- c(gamma, phi, rho, delta)
-  
   
 gamma_b <- matrix(c(0.1,0.8,0.3,0.9,0.25,0.9,0.0,0.5,0.0,0.5,0.0,0.5), nrow=6, byrow=TRUE)
 phi_b   <- c(-1.2,0.85)
@@ -42,9 +43,8 @@ vcv       <- matrix(c(sigma_eps^2,0,0,sigma_v^2), nrow=2, byrow=TRUE)
 detV      <- det(vcv)
 w         <- c(1,1,1)        
     
-    
-P  <- list('beta',beta,'sigma',sigma,'sigma_eps',sigma_eps,'eta',eta,'tau1',tau1,'r',r,'p',p,
-           'delta',delta,'w_min',w_min,'mu',mu,'cmin',cmin,'u0',u0,'u1',u1,'u2',u2,'w',w,'sigma_v',sigma_v)
+P  <- list('beta'=beta,'sigma'=sigma,'sigma_eps'=sigma_eps,'eta'=eta,'tau1'=tau1,'r'=r,'p'=p,'delta'=delta,
+           'w_min'=w_min,'mu'=mu,'cmin'=cmin,'u0'=u0,'u1'=u1,'u2'=u2,'w'=w,'sigma_v'=sigma_v)
     
 ### State space ###
       
@@ -61,19 +61,19 @@ nper      <- 3
 Nc        <- 20
 Ntinv     <- 3
 ncheb_pol <- 6
-#pc=[5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95];
-neps=2;
-[e wt]= GaussHermite_2(Ne); # Delivers integration nodes and weights for epsilon
-eps_y=sqrt(2)*e*sigma_eps; # error vector
-eps_h=sqrt(2)*e*sigma_v;
+neps <- 2
+out <- gauss.quad(Ne) # Delivers integration nodes and weights for epsilon
+e <- out$nodes
+wt <- out$weights
+eps_y <- sqrt(2)*e*sigma_eps # error vector
+eps_h <- sqrt(2)*e*sigma_v
     
     
-G  = struct('M',M,'M2',M2,'Ne',Ne,'nss',nss,'ncheby',ncheby,'npop',npop,...
-            'ntime',ntime,'nper',nper,'ncheb_pol',ncheb_pol,'Nc',Nc,'Ntinv',Ntinv,...
-            'eps_y',eps_y,'eps_h',eps_h,'wt',wt);
+G  <- list('M'=M,'M2'=M2,'Ne'=Ne,'nss'=nss,'ncheby'=ncheby,'npop'=npop,'ntime'=ntime,'nper'=nper,
+           'ncheb_pol'=ncheb_pol,'Nc'=Nc,'Ntinv'=Ntinv,'eps_y'=eps_y,'eps_h'=eps_h,'wt'=wt)
     
     
 ### Shocks ###
       
-epsy_sim=randn(npop,nper).*sigma_eps; 
-epsh_sim=randn(npop,nper).*sigma_v; 
+#epsy_sim <- rand(npop,nper).*sigma_eps 
+#epsh_sim <- rand(npop,nper).*sigma_v 
