@@ -1,6 +1,6 @@
-###############################################
-##### Parental Investments in Children  n #####
-###############################################
+############################################
+##### Parental Investments in Children #####
+############################################
 
 rm(list=ls())
 #install.packages('statmod')
@@ -23,6 +23,8 @@ rho_b   <- c(0.2,0.85)
 delta_b <- c(1,4);
 bounds  <- c(gamma_b,phi_b,rho_b,delta_b)
   
+params <- params0
+
 ### Calibrated Estimates ###
     
 sigma     <- 0.5            #Elasticity of Substitution
@@ -46,7 +48,7 @@ w         <- c(1,1,1)
 P  <- list('beta'=beta,'sigma'=sigma,'sigma_eps'=sigma_eps,'eta'=eta,'tau1'=tau1,'r'=r,'p'=p,'delta'=delta,
            'w_min'=w_min,'mu'=mu,'cmin'=cmin,'u0'=u0,'u1'=u1,'u2'=u2,'w'=w,'sigma_v'=sigma_v)
     
-### State space ###
+##### 2. STATE SPACE #####
       
 # Total states: A=15; H:15; eps_y=3; eps_h1=3 
     
@@ -55,7 +57,7 @@ M2 <- M
 Ne <- 3 # Gauss-Hermite Points
 nss <- M^2 #state space A and H1
 ncheby    <- M-2
-npop      <- 40000
+npop      <- 40 #40000
 ntime     <- 4
 nper      <- 3
 Nc        <- 20
@@ -71,9 +73,12 @@ eps_h <- sqrt(2)*e*sigma_v
 G  <- list('M'=M,'M2'=M2,'Ne'=Ne,'nss'=nss,'ncheby'=ncheby,'npop'=npop,'ntime'=ntime,'nper'=nper,
            'ncheb_pol'=ncheb_pol,'Nc'=Nc,'Ntinv'=Ntinv,'eps_y'=eps_y,'eps_h'=eps_h,'wt'=wt)
     
-params <- params0
-
-### Shocks ###
+##### 3. SHOCKS #####
       
-#epsy_sim <- rnorm(npop,nper).*sigma_eps # makes npopxnper matrix of random numbers dot multiplied by sigma_eps
-#epsh_sim <- rnorm(npop,nper).*sigma_v 
+epsy_sim <- kronecker(matrix(rnorm(npop*nper),npop,nper),sigma_eps)
+epsh_sim <- kronecker(matrix(rnorm(npop*nper),npop,nper),sigma_v)
+
+##### 4. TEST FUNCTIONS #####
+
+# [S,B,inc_min_sim,inc_wage_sim,inc_sim,INC,PI]=thci_ss(params0,G,P,epsy_sim);
+# [W,A,Minv,Tinv,C]=thci_sol_grid20(params0,P,G,B,S);  
