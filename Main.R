@@ -68,12 +68,12 @@ wt <- out$weights
 eps_y <- sqrt(2)*e*sigma_eps # error vector
 eps_h <- sqrt(2)*e*sigma_v
     
-    
 G  <- list('M'=M,'M2'=M2,'Ne'=Ne,'nss'=nss,'ncheby'=ncheby,'npop'=npop,'ntime'=ntime,'nper'=nper,
            'ncheb_pol'=ncheb_pol,'Nc'=Nc,'Ntinv'=Ntinv,'eps_y'=eps_y,'eps_h'=eps_h,'wt'=wt)
     
-    
+params <- params0
+
 ### Shocks ###
       
-#epsy_sim <- rand(npop,nper).*sigma_eps 
-#epsh_sim <- rand(npop,nper).*sigma_v 
+#epsy_sim <- rnorm(npop,nper).*sigma_eps # makes npopxnper matrix of random numbers dot multiplied by sigma_eps
+#epsh_sim <- rnorm(npop,nper).*sigma_v 
