@@ -56,7 +56,7 @@ thci_ss <- function(params,G,P,epsy_sim) {
                   b1 <- matrix(inc[,1], nrow = G$nss, ncol = length(inc[,1]), byrow = TRUE)+(1+P$r)*matrix(a_[,1], nrow =length(a_[,1]), ncol = G$Ne)
                   b2 <- matrix(inc[,2], nrow = G$nss, ncol = length(inc[,2]), byrow = TRUE)+(1+P$r)*matrix(a_[,2], nrow =length(a_[,2]), ncol = G$Ne)
                   b3 <- matrix(inc[,3], nrow = G$nss, ncol = length(inc[,3]), byrow = TRUE)+(1+P$r)*matrix(a_[,3], nrow =length(a_[,3]), ncol = G$Ne)
-                  b <- cbind(b1, b2, b3)
+                  b <- rbind(b1, b2, b3) ### CHECK
 
 ## Grid for choice variables 
 
@@ -80,26 +80,31 @@ thci_ss <- function(params,G,P,epsy_sim) {
   ### Polynomial Bases and Derivatives #### 
   
   B <- chebpoly_base(G$ncheby+1,z) #Polynomial base for Objective function
-  T <- kronecker(B,B)                
+  T <- kronecker(B,B)
   
-  for t=1:1:G.ntime
-  [dBh(:,:,t),dBa(:,:,t),ddBh(:,:,t),ddBa(:,:,t)]=Dchebpoly_deriv(G.ncheby+1,z,B,dh(t),da(1,t));
-  end
+  D1 <- Dchebpoly_deriv(G$ncheby+1,z,B,dh[1],da[1])
+  D2 <- Dchebpoly_deriv(G$ncheby+1,z,B,dh[2],da[2])
+  D3 <- Dchebpoly_deriv(G$ncheby+1,z,B,dh[3],da[3])
+  D4 <- Dchebpoly_deriv(G$ncheby+1,z,B,dh[4],da[4])
   
+  dBh <- rbind(D1$dT1, D2$dT1, D3$dT1, D4$dT1) ### CHECK
+  dBa <- rbind(D1$dT2, D2$dT2, D3$dT2, D4$dT2) ### CHECK
+  ddBh <- rbind(D1$ddT1, D2$ddT1, D3$ddT1, D4$ddT1) ### CHECK
+  ddBa <- rbind(D1$ddT2, D2$ddT2, D3$ddT2, D4$ddT2) ### CHECK
   
   ### Polynomial Bases Policy Function ####
   # Basis for states
   B_sim <- chebpoly_base(G$ncheb_pol,z)
   
   # Basis for Income Shocks
-  z_epsw= 2*(G.eps_y(:,1)-G.eps_y(1,1))/(G.eps_y(G.Ne,1)-G.eps_y(1,1))-1; 
-  B_ew=chebpoly_base(G.Ne-1,z_epsw);
+  z_epsw <- 2*(G$eps_y-G$eps_y[1])/(G$eps_y[G$Ne]-G$eps_y[1])-1
+  B_ew <- chebpoly_base(G$Ne,z_epsw) ### NOTE: G$Ne-1 = 2, breaks the n loop in chebpolybase, switch to G$Ne
   
   
   # Multidimensional base
-  T_sim=kron(B_sim,kron(B_sim,B_ew));
+  T_sim <- kronecker(B_sim,kronecker(B_sim,B_ew))
   
-  B  = struct('B',B,'dBh',dBh,'dBa',dBa,'ddBh',ddBh,'ddBa',ddBa,'B_sim',B_sim,'B_ew',B_ew,'T_sim',T_sim);
+  B  <- list('B'=B,'dBh'=dBh,'dBa'=dBa,'ddBh'=ddBh,'ddBa'=ddBa,'B_sim'=B_sim,'B_ew'=B_ew,'T_sim'=T_sim)
   
-return(S,B,inc_min_sim,inc_wage_sim,inc_sim,INC,PI)
+return <- list('S'=S,'B'=B,'inc_min_sim'=inc_min_sim,'inc_wage_sim'=inc_wage_sim,'inc_sim'=inc_sim,'INC'=INC,'PI'=PI)
 }

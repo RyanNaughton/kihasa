@@ -78,7 +78,7 @@ Ntinv     = 3;
 ncheb_pol=6;
 %pc=[5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95];
 neps=2;
-[e wt]= GaussHermite_2(Ne); % Delivers integration nodes and weights for epsilon
+[e, wt]= GaussHermite_2(Ne); % Delivers integration nodes and weights for epsilon
 eps_y=sqrt(2)*e*sigma_eps; % error vector
 eps_h=sqrt(2)*e*sigma_v;
 
