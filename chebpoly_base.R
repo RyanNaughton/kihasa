@@ -15,7 +15,7 @@ chebpoly_base <- function(n,x) {
     
     # Second-column: polynomial of degree 1
     T[,2] <- x
-    
+### tell R to skip if i < 3
     for (i in 3:n)
     {
       T[,i] <- 2*x*T[,i-1]-T[,i-2]

@@ -51,7 +51,7 @@ detV      <- det(vcv)
 w         <- c(1,1,1)        
   
 P  <- list('beta'=beta,'sigma'=sigma,'sigma_eps'=sigma_eps,'eta'=eta,'tau1'=tau1,'r'=r,'p'=p,'delta'=delta,
-         'w_min'=w_min,'mu'=mu,'cmin'=cmin,'u0'=u0,'u1'=u1,'u2'=u2,'w'=w,'sigma_v'=sigma_v)
+           'w_min'=w_min,'mu'=mu,'cmin'=cmin,'u0'=u0,'u1'=u1,'u2'=u2,'w'=w,'sigma_v'=sigma_v)
   
 ##### 2. STATE SPACE #####
     
@@ -76,7 +76,7 @@ eps_y <- sqrt(2)*e*sigma_eps # error vector
 eps_h <- sqrt(2)*e*sigma_v
   
 G  <- list('M'=M,'M2'=M2,'Ne'=Ne,'nss'=nss,'ncheby'=ncheby,'npop'=npop,'ntime'=ntime,'nper'=nper,
-         'ncheb_pol'=ncheb_pol,'Nc'=Nc,'Ntinv'=Ntinv,'eps_y'=eps_y,'eps_h'=eps_h,'wt'=wt)
+           'ncheb_pol'=ncheb_pol,'Nc'=Nc,'Ntinv'=Ntinv,'eps_y'=eps_y,'eps_h'=eps_h,'wt'=wt)
   
 ##### 3. SHOCKS #####
     

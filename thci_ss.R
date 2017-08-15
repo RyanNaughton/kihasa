@@ -56,7 +56,7 @@ thci_ss <- function(params,G,P,epsy_sim) {
                   b1 <- matrix(inc[,1], nrow = G$nss, ncol = length(inc[,1]), byrow = TRUE)+(1+P$r)*matrix(a_[,1], nrow =length(a_[,1]), ncol = G$Ne)
                   b2 <- matrix(inc[,2], nrow = G$nss, ncol = length(inc[,2]), byrow = TRUE)+(1+P$r)*matrix(a_[,2], nrow =length(a_[,2]), ncol = G$Ne)
                   b3 <- matrix(inc[,3], nrow = G$nss, ncol = length(inc[,3]), byrow = TRUE)+(1+P$r)*matrix(a_[,3], nrow =length(a_[,3]), ncol = G$Ne)
-                  b <- rbind(b1, b2, b3) ### CHECK
+                  b <- rbind(b1, b2, b3) ### CHECK - make list better
 
 ## Grid for choice variables 
 
@@ -98,7 +98,7 @@ thci_ss <- function(params,G,P,epsy_sim) {
   
   # Basis for Income Shocks
   z_epsw <- 2*(G$eps_y-G$eps_y[1])/(G$eps_y[G$Ne]-G$eps_y[1])-1
-  B_ew <- chebpoly_base(G$Ne,z_epsw) ### NOTE: G$Ne-1 = 2, breaks the n loop in chebpolybase, switch to G$Ne
+  B_ew <- chebpoly_base(G$Ne,z_epsw) ### NOTE: G$Ne-1 = 2, breaks the n loop in chebpolybase.R, switch to G$Ne
   
   
   # Multidimensional base
