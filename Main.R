@@ -75,8 +75,8 @@ G  <- list('M'=M,'M2'=M2,'Ne'=Ne,'nss'=nss,'ncheby'=ncheby,'npop'=npop,'ntime'=n
     
 ##### 3. SHOCKS #####
       
-epsy_sim <- kronecker(matrix(rnorm(npop*nper),npop,nper),sigma_eps)
-epsh_sim <- kronecker(matrix(rnorm(npop*nper),npop,nper),sigma_v)
+epsy_sim <- kronecker(matrix(rnorm(npop*nper),nrow = npop,ncol = nper),sigma_eps)
+epsh_sim <- kronecker(matrix(rnorm(npop*nper),nrow = npop,ncol = nper),sigma_v)
 
 ##### 4. TEST FUNCTIONS #####
 

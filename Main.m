@@ -12,7 +12,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-load mm_est1.txt
+%load mm_est1.txt
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -97,7 +97,7 @@ epsh_sim=randn(npop,nper).*sigma_v;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 4. Test Functions   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-[S,B,inc_min_sim,inc_wage_sim,inc_sim,INC,PI]=thci_ss(params0,G,P,epsy_sim);
+[S,B,inc_min_sim,inc_wage_sim,inc_sim,~,PI]=thci_ss(params0,G,P,epsy_sim);
 
 tic;   
 [W,A,Minv,Tinv,C]=thci_sol_grid20(params0,P,G,B,S);   
