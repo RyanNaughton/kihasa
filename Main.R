@@ -10,6 +10,7 @@ require("statmod")
 source("thci_ss.R")
 source("chebpoly_base.R")
 source("Dchebpoly_deriv.R")
+source("utilfun.R")
 
 ##### 1. PARAMETERS #####
 
