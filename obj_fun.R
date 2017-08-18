@@ -35,12 +35,10 @@ obj_fun <- function(alpha,params,t,P,G,S,h,a,inc_min,inc_wage,c,minv,tinv) {
       delta <- params[9]
       inc <- inc_min + inc_wage # 9x1 matrix
       apr <- (1+P$r)*a + inc*(1-tinv) - P$p*minv - c
-      hpr <- delta*CES(h,minv,tinv,gamma(t,:),rho,phi,0);
-      EV <- cheby_approx(alpha,G.ncheby,S.extmin1(t+1),S.extmin2(1,t+1),S.dh(t+1),S.da(1,t+1),hpr,apr);
+      hpr <- delta*CES(h,minv,tinv,gamma[t,],rho,phi,0)
+      EV <- cheby_approx(alpha,G$ncheby,ss$S$extmin1[t+1],ss$S$extmin2[t+1],ss$S$dh[t+1],ss$S$da[t+1],hpr,apr)
       
-      
-      objf= u + P.beta*EV;
+      obj <-  u + P$beta*EV
       
   return <- c(objf,apr,hpr)
 }
-
