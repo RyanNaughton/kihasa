@@ -7,10 +7,13 @@ rm(list=ls())
 require("statmod")
 
 #load functions
+source("CES.R")
+source("utilfun.R")
 source("thci_ss.R")
+source("obj_fun.R")
+source("cheby_approx.R")
 source("chebpoly_base.R")
 source("Dchebpoly_deriv.R")
-source("utilfun.R")
 
 ##### 1. PARAMETERS #####
 

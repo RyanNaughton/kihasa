@@ -18,6 +18,11 @@ thci_sol_grid20 <- function(params,P,G,B,S) {
   
   alp2 <- matrix(0, nrow = G$ntime-1, ncol = (G$ncheby+1)^2) #empty matrix of 3x29^2 = 3x1841
   
+  ### start empty matrix
+  VV1 <- matrix(0, nrow = G$Nc, ncol = G$Nc)
+  VV2 <- matrix(0, nrow = G$Nc, ncol = G$Nc)
+  VV3 <- matrix(0, nrow = G$Nc, ncol = G$Nc)
+  
   for (t in G$ntime-1:1)
   {
     ## A.Polynomial Approximation of Expected Value Function
@@ -35,10 +40,20 @@ thci_sol_grid20 <- function(params,P,G,B,S) {
     
     for k=1:G.Nc
     for l=1:G.Nc
-    for m=1:G.Ntinv
-    [VV(k,l,m),apr(k,l,m), hpr(k,l,m)]=obj_fun(alp2(t,:),params,t,P,G,S,S.h_(j,t),S.a_(j,t),S.inc_min(i,t),S.inc_wage(i,t),S.c(j,k),S.minv(j,l),S.tinv(m));
-    bc_val(k,l,m)=(apr(k,l,m)>=S.a1(t+1) && apr(k,l,m)<=S.a2(t+1) && hpr(k,l,m)>=S.h1(t+1) && hpr(k,l,m)<=S.h2(t+1));                                                   
-    end
+    #for m=1:G.Ntinv
+    
+    objf1 <- obj_fun(alp2[t,],params,t,P,G,S, ss$S$h_[j,t], ss$S$a_[j,t], ss$S$inc_min[i,t], ss$S$inc_wage[i,t], ss$S$c[j,k], ss$S$minv[j,l], ss$S$tinv[1])
+    objf2 <- obj_fun(alp2[t,],params,t,P,G,S, ss$S$h_[j,t], ss$S$a_[j,t], ss$S$inc_min[i,t], ss$S$inc_wage[i,t], ss$S$c[j,k], ss$S$minv[j,l], ss$S$tinv[2])
+    objf3 <- obj_fun(alp2[t,],params,t,P,G,S, ss$S$h_[j,t], ss$S$a_[j,t], ss$S$inc_min[i,t], ss$S$inc_wage[i,t], ss$S$c[j,k], ss$S$minv[j,l], ss$S$tinv[3])
+    
+    VV1[k,l] <- objf1$objf[k,l]
+    VV2[k,l] <- objf2$objf[k,l]
+    VV3[k,l] <- objf3$objf[k,l]
+    
+    #[VV(k,l,m),apr(k,l,m), hpr(k,l,m)]=obj_fun(alp2(t,:),params,t,P,G,S,S.h_(j,t),S.a_(j,t),S.inc_min(i,t),S.inc_wage(i,t),S.c(j,k),S.minv(j,l),S.tinv(m));
+    #bc_val(k,l,m)=(apr(k,l,m)>=S.a1(t+1) && apr(k,l,m)<=S.a2(t+1) && hpr(k,l,m)>=S.h1(t+1) && hpr(k,l,m)<=S.h2(t+1));                                                   
+    
+    #end
     end 
     end
     
@@ -64,7 +79,6 @@ thci_sol_grid20 <- function(params,P,G,B,S) {
     end
     i
     end
-
     
   }
 
