@@ -5,6 +5,7 @@
 rm(list=ls())
 #install.packages('statmod')
 require("statmod")
+source("ind2sub.R")
 
 #load functions
 source("CES.R")
