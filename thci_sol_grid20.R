@@ -1,7 +1,7 @@
 thci_sol_grid20 <- function(params,P,G,B,S) {
   
   gamma <- params[1:6]
-  phi <- params[7]
+  phi <- params[7]    
   rho <- params[8]
   delta <- params[9]
   
