@@ -40,7 +40,7 @@ for t=G.ntime-1:-1:1
              auxV=zeros(G.Ntinv,1);
 
              Ind_bc_check=VV.*bc_val;
-             for m=1:G.Ntinv
+             for m=1:1%G.Ntinv
                 Ind_bc=VV(:,:,m).*bc_val(:,:,m);
                 [V_tinv,Indaux] = max(Ind_bc(:));
                 auxV(m)=V_tinv;

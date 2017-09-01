@@ -102,7 +102,7 @@ epsh_sim=randn(npop,nper).*sigma_v;
 tic;   
 [W,A,Minv,Tinv,C]=thci_sol_grid20(params0,P,G,B,S);   
 toc;
-
+STOP
 tic;
 [alp_C,alp_Minv,alp_Tinv]=thci_polfunc_new(G,P,B,S,C,Minv,Tinv);
 toc;
