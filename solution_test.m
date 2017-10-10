@@ -51,19 +51,28 @@ for t = G.n_period-1:-1:1
             hhinc = w_j + wh_j*m_j + shock;
             
             % transitions:
-            X_0 = X_j - 1;
+            X_0 = X_j - 1; % when they work, we know that is T or F, when I calculate the value functions
+            % need a wage function of each labor supply option
             wh_0 = wh_j;
             K_0 = K_j - inv;
             A_0 = A_j/(1+r) - hhinc - c_hh - n_j*inv; % eq. 8
+            % put this into the consumption loop (bc hhinc)
+            % assets and experience are endogeneous, so they need to be in
+            % the consumption loop
             
             % probabilities:      
             
             % loop over consumption (5):
-            for k = 1:1:length(c_vector)
+            for k = 1:1:length(c_vector) % this is HH consumption
                 k
                 c = c_vector(k);
                 
                 % value functions:
+                % calulcate the wage in regular and non-regular (using the
+                % experience) and the budget constraint (using the assets
+                % transtion)
+                
+                % start with sector specific value functions
                 
                 % calculate utility
                 u(k) = (c^(1-sigma))/(1-sigma) + phi + kappa*(1+theta1*SS(j,1)+theta2*SS(j,2)+theta3*SS(j,6));
