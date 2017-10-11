@@ -45,39 +45,63 @@ for t = G.n_period-1:-1:1
             
             % HC of child:
             K_j = SS(j,6);
-            
-            % household income:
-            w_j = exp(alpha1*edu + alpha2*SS(j,3) + abi);
-            hhinc = w_j + wh_j*m_j + shock;
-            
-            % transitions:
-            X_0 = X_j - 1; % when they work, we know that is T or F, when I calculate the value functions
-            % need a wage function of each labor supply option
+                  
+            % transitions for exogenous variables
             wh_0 = wh_j;
             K_0 = K_j - inv;
-            A_0 = A_j/(1+r) - hhinc - c_hh - n_j*inv; % eq. 8
-            % put this into the consumption loop (bc hhinc)
-            % assets and experience are endogeneous, so they need to be in
-            % the consumption loop
-            
+              
             % probabilities:      
+            lambda_r = 0.7;
+            pi_r = 0.2;
             
             % loop over consumption (5):
             for k = 1:1:length(c_vector) % this is HH consumption
                 k
-                c = c_vector(k);
+                
+                chh = c_vector(k);
+                cw = (1+delta1*m_j+delta2*n_j)*chh;
                 
                 % value functions:
+                
+                    % transitions for endogenous variables (assets and work
+                    % experience)
+                    
+                    % regular job:
+                     X_0 = X_j - 1;
+                     w_j = exp(alpha1*edu + alpha2*SS(j,3) + abi);
+                     A_0 = A_j/(1+r) - (w_j + wh_j*m_j + shock) - chh - n_j*inv; % eq. 8
+                     
+                     V_r_next = ;
+                     V_n_next = ;
+                     V_u_next = ;
+                     [I_r, Emax_r] = max(V_r_next,V_n_next);
+                     [I_n, Emax_n] = max(V_r_next,V_n_next,V_u_next);
+                    
+                    % calculate utility
+                    u_r(k) = (cw^(1-sigma))/(1-sigma) + phi + kappa*(1+theta1*SS(j,1)+theta2*SS(j,2)+theta3*SS(j,6));
+                    V_r(k) = u_r(k) + beta*lambda_r*Emax_r +;
+                    
+                    % non-regular job:
+                    X_0 = X_j - 1;
+                    w_j = exp(alpha1*edu + alpha2*SS(j,3) + abi); % how is this different from regular?
+                    A_0 = A_j/(1+r) - (w_j + wh_j*m_j + shock) - chh - n_j*inv;
+                    
+                    % calculate utility
+                    u_r(k) = (cw^(1-sigma))/(1-sigma) + phi + kappa*(1+theta1*SS(j,1)+theta2*SS(j,2)+theta3*SS(j,6));
+                    V_r(k) = u_r(k) + 
+                    
+                    
+                    % unemployment:
+                    X_0 = X_j;
+                    w_j = w_min;
+                     
                 % calulcate the wage in regular and non-regular (using the
                 % experience) and the budget constraint (using the assets
                 % transtion)
                 
                 % start with sector specific value functions
                 
-                % calculate utility
-                u(k) = (c^(1-sigma))/(1-sigma) + phi + kappa*(1+theta1*SS(j,1)+theta2*SS(j,2)+theta3*SS(j,6));
-                
-                V(k) = u(k) +
+
             end
                 % save optimal U* & c*
                 [U_star,c_star] = max(V);
