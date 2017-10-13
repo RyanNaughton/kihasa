@@ -51,7 +51,7 @@ for t = G.n_period-1:-1:1
             K_0 = K_j - inv;
               
             % probabilities:      
-            lambda_r = 0.7;
+            lambda_r = 0.7; %needs to be function of education & 
             pi_r = 0.2;
             
             % loop over consumption (5):
@@ -68,8 +68,8 @@ for t = G.n_period-1:-1:1
                     
                     % regular job:
                      X_0 = X_j - 1;
-                     w_j = exp(alpha1*edu + alpha2*SS(j,3) + abi);
                      A_0 = A_j/(1+r) - (w_j + wh_j*m_j + shock) - chh - n_j*inv; % eq. 8
+                     w_j = exp(alpha1*edu + alpha2*X_j + abi + sector_specific_shock);
                      
                      V_r_next = ;
                      V_n_next = ;
@@ -78,7 +78,7 @@ for t = G.n_period-1:-1:1
                      [I_n, Emax_n] = max(V_r_next,V_n_next,V_u_next);
                     
                     % calculate utility
-                    u_r(k) = (cw^(1-sigma))/(1-sigma) + phi + kappa*(1+theta1*SS(j,1)+theta2*SS(j,2)+theta3*SS(j,6));
+                    u_r(k) = (cw^(1-sigma))/(1-sigma) + sector_specific_phi + kappa*(1+theta1*SS(j,1)+theta2*SS(j,2)+theta3*SS(j,6));
                     V_r(k) = u_r(k) + beta*lambda_r*Emax_r +;
                     
                     % non-regular job:
