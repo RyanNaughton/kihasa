@@ -89,9 +89,6 @@ gamma_b=[0.2 0.9];
 theta_b=[0.1 0.9];
 bounds = [alpha_b,delta_b,gamma_b,theta_b];
 
-%PARAMETERS BY AGE AND EDUCATION
-%PROBABILITY FUNCTIONS
-
 P = struct();
 
 %% Initial Conditions
@@ -101,11 +98,12 @@ abi = [1 2];
 types = [kron(abi',ones(length(edu),1)) repmat(edu',[length(abi) 1])];
 
 %% Shocks
-shock_r = [1:3];
-shock_n = [1:3];
-shocks = [kron(shock_r',ones(length(shock_n),1)) repmat(shock_n',[length(shock_r) 1])];
-
-shock_vector = [-1:1]; % household income shock
+shock_r = [-1:1]; % sector R wages shock
+shock_n = [-1:1]; % sector N wages shock
+shock_hh= [-1:1]; % household income shock
+shock_vector = [kron(shock_hh',ones(length(shock_n)*length(shock_r),1))...
+                repmat(kron(shock_r',ones(length(shock_n),1)),[length(shock_hh) 1])...
+                repmat(shock_n',[length(shock_hh)*length(shock_r) 1])]; 
 
 %% General Parameters
 
@@ -116,18 +114,22 @@ n_pop = 1000;
 
 G = struct('n_incond',n_incond,'n_period',n_period,'n_shocks',n_shocks,'n_pop',n_pop);
 
+%% QUESTIONS:
+%PARAMETERS BY AGE AND EDUCATION
+%PROBABILITY FUNCTIONS
+
 %% State Space
 
 %Endogenous
 
 ass_lb = 1;
 ass_up = 5;
-n_ass = 10;
+n_ass = 3;
 assets = linspace(ass_lb,ass_up,n_ass);
 
 matstat = [0 1];
 
-workexp = [1:15];
+workexp = [1:4];
 workexp_r = [1:3];
 workexp_n = [1:3];
 
@@ -141,19 +143,18 @@ children = [0 1];
 
 hearn_lb = 1;
 hearn_ub = 5;
-n_hearn = 5;
+n_hearn = 3;
 hearnings = linspace(hearn_lb,hearn_ub,n_hearn);
 
 childHC_lb = 1.1;
 childHC_ub = 4.5;
-n_childHC = 5;
+n_childHC = 3;
 childHC = linspace(childHC_lb,childHC_ub,n_childHC);
 
-SS = [kron(matstat',ones(length(sector),1)) repmat(sector',[length(matstat) 1])];
-
-%% Temporarily, import SS from excel
-
-[~, ~, raw] = xlsread('C:\Users\jchenper\Documents\GitHub\kihasa\ini_ss.xlsx','Sheet1','A2:F217');
-iniss = reshape([raw{:}],size(raw));
-clearvars raw;
-SS = iniss;
+SS_K = repmat(childHC',[length(assets)*length(hearnings)*length(workexp)*length(matstat) 1]);
+SS_A = repmat(kron(assets',ones(length(childHC),1)),[length(hearnings)*length(workexp)*length(matstat) 1]);
+SS_H = repmat(kron(hearnings',ones(length(assets)*length(childHC),1)),[length(workexp)*length(matstat) 1]);
+SS_X = repmat(kron(workexp',ones(length(hearnings)*length(assets)*length(childHC),1)),[length(matstat) 1]);
+SS_N = kron(children',ones([length(childHC)*length(assets)*length(hearnings)*length(workexp),1]));
+SS_M = kron(matstat',ones([length(childHC)*length(assets)*length(hearnings)*length(workexp),1]));
+SS = [SS_M SS_N SS_X SS_H SS_A SS_K];
