@@ -93,9 +93,9 @@ P = struct();
 
 %% Initial Conditions
 
-edu = [1:3];
-abi = [1 2];
-types = [kron(abi',ones(length(edu),1)) repmat(edu',[length(abi) 1])];
+edu_levels = [1:3];
+abi_levels = [1 2];
+types = [kron(abi_levels',ones(length(edu_levels),1)) repmat(edu_levels',[length(abi_levels) 1])];
 
 %% Shocks
 shock_r = [-1:1]; % sector R wages shock
@@ -108,7 +108,7 @@ shock_vector = [kron(shock_hh',ones(length(shock_n)*length(shock_r),1))...
 %% General Parameters
 
 n_incond = length(types);
-n_shocks = length(shocks); %should be 27, missing 1 (unemployment) shock?
+n_shocks = length(shock_vector);
 n_period = 25;
 n_pop = 1000;
 
