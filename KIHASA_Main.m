@@ -70,9 +70,12 @@ alpha3_n=0.4;
 %unemployed?
 
 %Interest rate
-r=0.7;
+r=0.07;
 
-%Ivestment in Children
+%Discount rate
+beta=0.05;
+
+%Investment in Children
 inv=1;
 
 %Vector of Initial Parameters

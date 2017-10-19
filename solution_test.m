@@ -137,10 +137,12 @@ TVF = assets + wages + hhprod;
                 c_r_star = c_vector(Index_r_k);
                 c_n_star = c_vector(Index_n_k);
                 c_u_star = c_vector(Index_u_k);
+                c_star_vector = [c_r_star, c_n_star, c_u_star];
                 
                 % save labor choice:
-                [V_star, l_star] = max([V_r_star,V_n_star,V_u_star]);
-                
+                [V_star, Index_l] = max([V_r_star,V_n_star,V_u_star]);
+                c_star(j) = c_star_vector(Index_l);
+                l_star(j) = Index_l;
         %end   
     %end
 %end
