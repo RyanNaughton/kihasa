@@ -17,6 +17,10 @@ TVF = assets + wages + hhprod;
 %for t = G.n_period-1:-1:1
     t=1;
     
+    if t==G.n_period-1
+        Emax = TVF;
+    end
+    
     % loop for shocks (27):
     %for i = 1:1:G.n_shocks
         i=1;
@@ -56,8 +60,8 @@ TVF = assets + wages + hhprod;
             K_next = K_j + inv;
             
             % loop over consumption (5):
-            %for k = 1:1:length(c_vector)
-                k=1;
+            for k = 1:1:length(c_vector)
+                %k=1;
                 
                 chh = c_vector(k); % HH consumption
                 cw = (1+delta1*m_j+delta2*n_j)*chh; % woman's consumption
@@ -76,7 +80,7 @@ TVF = assets + wages + hhprod;
                     end
                     
                     % interpolated t+1:
-                    V_r_next = interpn(SS_M,SS_N,SS_X,SS_H,SS_A,SS_K,TVF,m_next,n_next,X_next,wh_next,A_next,K_next);
+                    %V_r_next = interpn(SS_M,SS_N,SS_X,SS_H,SS_A,SS_K,TVF,m_next,n_next,X_next,wh_next,A_next,K_next);
                     
                 % non-regular job:
                 
@@ -92,7 +96,7 @@ TVF = assets + wages + hhprod;
                     end
                     
                     % interpolated t+1:
-                    V_n_next = interpn(SS_M,SS_N,SS_X,SS_H,SS_A,SS_K,TVF,m_next,n_next,X_next,wh_next,A_next,K_next);
+                    %V_n_next = interpn(SS_M,SS_N,SS_X,SS_H,SS_A,SS_K,TVF,m_next,n_next,X_next,wh_next,A_next,K_next);
                     
                 % unemployed:
                     
@@ -108,35 +112,35 @@ TVF = assets + wages + hhprod;
                     end
                     
                     % interpolated t+1:
-                    V_u_next = interpn(SS_M,SS_N,SS_X,SS_H,SS_A,SS_K,TVF,m_next,n_next,X_next,wh_next,A_next,K_next);
+                    %V_u_next = interpn(SS_M,SS_N,SS_X,SS_H,SS_A,SS_K,TVF,m_next,n_next,X_next,wh_next,A_next,K_next);
                     
                 % Value Functions:
                     
                     % Sector-Specific Utility:
                     u_r(k) = (cw^(1-sigma))/(1-sigma) + psi_r + kappa*(1+theta1*m_j+theta2*n_j+theta3*K_j);
-                    u_n(k) = (cw^(1-sigma))/(1-sigma) + phi_n + kappa*(1+theta1*m_j+theta2*n_j+theta3*K_j);
+                    u_n(k) = (cw^(1-sigma))/(1-sigma) + psi_n + kappa*(1+theta1*m_j+theta2*n_j+theta3*K_j);
                     u_u(k) = (cw^(1-sigma))/(1-sigma) + kappa*(1+theta1*m_j+theta2*n_j+theta3*K_j);
                     
                     % Expected Utility:
-                    Emax = max(V_r_next,V_n_next,V_u_next);
+                    %Emax = max(V_r_next,V_n_next,V_u_next);
                     
                     % Sector-Specific Value Functions:
-                    V_r(k) = u_r(k) + beta*Emax;
-                    V_n(k) = u_n(k) + beta*Emax;
-                    V_u(k) = u_u(k) + beta*Emax;
+                    V_r(k) = u_r(k); %+ beta*Emax;
+                    V_n(k) = u_n(k); %+ beta*Emax;
+                    V_u(k) = u_u(k); %+ beta*Emax;
                     
             end
                 % save optimal V* & c*
-                [Index_r_k, V_r_star] = max(V_r);
-                [Index_n_k, V_n_star] = max(V_n);
-                [Index_u_k, V_u_star] = max(V_u);
+                [V_r_star, Index_r_k] = max(V_r);
+                [V_n_star, Index_n_k] = max(V_n);
+                [V_u_star, Index_u_k] = max(V_u);
                 c_r_star = c_vector(Index_r_k);
                 c_n_star = c_vector(Index_n_k);
                 c_u_star = c_vector(Index_u_k);
                 
                 % save labor choice:
-                [l_star, V_star] = max(V_r_star,V_n_star,V_u_star);
+                [V_star, l_star] = max([V_r_star,V_n_star,V_u_star]);
                 
-        end   
-    end
-end
+        %end   
+    %end
+%end
