@@ -24,10 +24,10 @@ TVF = assets + wages + hhprod;
     % loop for shocks (27):
     %for i = 1:1:G.n_shocks
         i=1;
-        
-        shock_hh= shock_vector(1,i);
-        shock_r = shock_vector(2,i);
-        shock_n = shock_vector(3,i);
+        %expand the shock space to 27x1
+        shock_hh= shocks(1,i);
+        shock_r = shocks(2,i);
+        shock_n = shocks(3,i);
         
         % loop over states (216):
         %for j = 1:1:length(SS)
@@ -80,7 +80,9 @@ TVF = assets + wages + hhprod;
                     end
                     
                     % interpolated t+1:
-                    %V_r_next = interpn(SS_M,SS_N,SS_X,SS_H,SS_A,SS_K,TVF,m_next,n_next,X_next,wh_next,A_next,K_next);
+                    tmp = reshape(TVF,[n_childHC,n_ass,n_hearn,n_wrkexp,n_matstat]);
+                    % A_next is not within Assets vector
+                    V_r_next = interpn(matstat,children,workexp,hearnings,unique(assets),childHC,tmp,m_next,n_next,X_next,wh_next,A_next,K_next);
                     
                 % non-regular job:
                 

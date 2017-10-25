@@ -104,14 +104,14 @@ types = [kron(abi_levels',ones(length(edu_levels),1)) repmat(edu_levels',[length
 shock_r = [-1:1]; % sector R wages shock
 shock_n = [-1:1]; % sector N wages shock
 shock_hh= [-1:1]; % household income shock
-shock_vector = [kron(shock_hh',ones(length(shock_n)*length(shock_r),1))...
+shocks = [kron(shock_hh',ones(length(shock_n)*length(shock_r),1))...
                 repmat(kron(shock_r',ones(length(shock_n),1)),[length(shock_hh) 1])...
                 repmat(shock_n',[length(shock_hh)*length(shock_r) 1])]; 
 
 %% General Parameters
 
 n_incond = length(types);
-n_shocks = length(shock_vector);
+n_shocks = length(shocks);
 n_period = 25;
 n_pop = 1000;
 
@@ -131,10 +131,12 @@ n_ass = 3;
 assets = linspace(ass_lb,ass_up,n_ass);
 
 matstat = [0 1];
+n_matstat = length(matstat);
 
 workexp = [1:4];
 workexp_r = [1:3];
 workexp_n = [1:3];
+n_wrkexp = length(workexp);
 
 sector = [1:3];
 
