@@ -101,6 +101,12 @@ abi_levels = [1 2];
 types = [kron(abi_levels',ones(length(edu_levels),1)) repmat(edu_levels',[length(abi_levels) 1])];
 
 %% Shocks
+
+Ne = 3;
+[e, wt] = GaussHermite_2(Ne); % for each?
+eps_y=sqrt(2)*e*sigma_eps; % error vector
+eps_h=sqrt(2)*e*sigma_v;
+
 shock_r = [-1:1]; % sector R wages shock
 shock_n = [-1:1]; % sector N wages shock
 shock_hh= [-1:1]; % household income shock

@@ -21,17 +21,20 @@ TVF = assets + wages + hhprod;
         Emax = TVF;
     end
     
+    assets_wide = linspace(-5,10,n_ass);
+    childHC_wide = linspace(-5,10,n_childHC);
+    
     % loop for shocks (27):
-    %for i = 1:1:G.n_shocks
-        i=1;
-        %expand the shock space to 27x1
+    for i = 1:1:G.n_shocks % 27 x 3
+        i
+        
         shock_hh= shocks(1,i);
         shock_r = shocks(2,i);
         shock_n = shocks(3,i);
         
         % loop over states (216):
-        %for j = 1:1:length(SS)
-            j=1;
+        for j = 1:1:length(SS)
+            j
             
             % current state variables:
             m_j = SS_M(j);  % marital status
@@ -61,10 +64,10 @@ TVF = assets + wages + hhprod;
             
             % loop over consumption (5):
             for k = 1:1:length(c_vector)
-                %k=1;
+                k
                 
                 chh = c_vector(k); % HH consumption
-                cw = (1+delta1*m_j+delta2*n_j)*chh; % woman's consumption
+                cw = (1+delta1*m_j+delta2*n_j)*chh; % woman's consumption - can this be larger than HH consumption?
                 
                 % regular job:
                 
@@ -78,12 +81,15 @@ TVF = assets + wages + hhprod;
                         m_next = m_j;
                         n_next = n_j;
                     end
+                    if m_next > 1 % limit to less than 1
+                        m_next = 1;
+                        n_next = 1;
+                    end
                     
                     % interpolated t+1:
                     tmp = reshape(TVF,[n_childHC,n_ass,n_hearn,n_wrkexp,n_matstat]);
-                    % A_next is not within Assets vector
-                    V_r_next = interpn(matstat,children,workexp,hearnings,unique(assets),childHC,tmp,m_next,n_next,X_next,wh_next,A_next,K_next);
-                    
+                    V_r_next = interpn(childHC_wide,assets_wide,hearnings,workexp,matstat, tmp, K_next,A_next,wh_next,X_next,m_next);
+                    V_r_next
                 % non-regular job:
                 
                     % transitions:
@@ -96,10 +102,15 @@ TVF = assets + wages + hhprod;
                         m_next = m_j;
                         n_next = n_j;
                     end
+                    if m_next > 1 % limit to less than 1
+                        m_next = 1;
+                        n_next = 1;
+                    end
                     
                     % interpolated t+1:
-                    %V_n_next = interpn(SS_M,SS_N,SS_X,SS_H,SS_A,SS_K,TVF,m_next,n_next,X_next,wh_next,A_next,K_next);
-                    
+                    tmp = reshape(TVF,[n_childHC,n_ass,n_hearn,n_wrkexp,n_matstat]);
+                    V_n_next = interpn(childHC_wide,assets_wide,hearnings,workexp,matstat, tmp, K_next,A_next,wh_next,X_next,m_next);
+                    V_n_next
                 % unemployed:
                     
                     % transitions:
@@ -112,10 +123,15 @@ TVF = assets + wages + hhprod;
                         m_next = m_j;
                         n_next = n_j;
                     end
+                    if m_next > 1 % limit to less than 1
+                        m_next = 1;
+                        n_next = 1;
+                    end
                     
                     % interpolated t+1:
-                    %V_u_next = interpn(SS_M,SS_N,SS_X,SS_H,SS_A,SS_K,TVF,m_next,n_next,X_next,wh_next,A_next,K_next);
-                    
+                    tmp = reshape(TVF,[n_childHC,n_ass,n_hearn,n_wrkexp,n_matstat]);
+                    V_u_next = interpn(childHC_wide,assets_wide,hearnings,workexp,matstat, tmp, K_next,A_next,wh_next,X_next,m_next);
+                    V_u_next
                 % Value Functions:
                     
                     % Sector-Specific Utility:
@@ -124,12 +140,12 @@ TVF = assets + wages + hhprod;
                     u_u(k) = (cw^(1-sigma))/(1-sigma) + kappa*(1+theta1*m_j+theta2*n_j+theta3*K_j);
                     
                     % Expected Utility:
-                    %Emax = max(V_r_next,V_n_next,V_u_next);
+                    Emax = max([V_r_next,V_n_next,V_u_next]);
                     
                     % Sector-Specific Value Functions:
-                    V_r(k) = u_r(k); %+ beta*Emax;
-                    V_n(k) = u_n(k); %+ beta*Emax;
-                    V_u(k) = u_u(k); %+ beta*Emax;
+                    V_r(k) = u_r(k) + beta * Emax;
+                    V_n(k) = u_n(k) + beta * Emax;
+                    V_u(k) = u_u(k) + beta * Emax;
                     
             end
                 % save optimal V* & c*
@@ -143,8 +159,13 @@ TVF = assets + wages + hhprod;
                 
                 % save labor choice:
                 [V_star, Index_l] = max([V_r_star,V_n_star,V_u_star]);
-                c_star(j) = c_star_vector(Index_l);
+                c_star(j) = c_star_vector(Index_l); % add i to have 216 x 3?
                 l_star(j) = Index_l;
-        %end   
+                V_star_aux(j) = V_star;
+        end
+        
+        % Integrate over shocks
+        W(:,t)=pi^(-1/2)*V(:,:,t)*G.wt;
+        Em(:,t,k) = detR*detV^(-1/2)*pi^(-(size(R,1))/2)*G.w(i)*G.w(j)*V + Em(:,t,k);
     %end
 %end
