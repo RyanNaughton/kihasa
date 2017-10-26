@@ -12,6 +12,8 @@ wages = exp(alpha1*SS_X + alpha2*edu + abi);
 hhprod = (SS_M+1).^theta1 .* (SS_N+1).^theta2 .* SS_K;
 
 TVF = assets + wages + hhprod;
+%W(:,G.ntime)=P.eta*S.h_(:,G.ntime).^(1-P.sigma)/(1-P.sigma)+
+%P.tau1*(1-exp(-S.a_(:,G.ntime)));
 
 % loop for time (25):
 %for t = G.n_period-1:-1:1
@@ -24,14 +26,22 @@ TVF = assets + wages + hhprod;
     assets_wide = linspace(-5,10,n_ass);
     childHC_wide = linspace(-5,10,n_childHC);
     
+    %%%%%%%%% this is how you adjust the linepsace
+%     ubT= inc(1,3) + (1+P.r)*a_(:,3);
+%     for j=1:G.nss
+%       c(j,:)= linspace(0,ubT(j),G.Nc);
+%       minv(j,:)= linspace(0,ubT(j),G.Nc);
+%     end
+%     tinv= [0,0.5,1];
+    
     % loop for shocks (27):
-    for i = 1:1:G.n_shocks % 27 x 3
-        i
+    %for i = 1:1:G.n_shocks % 27 x 3
+        i=1;
         
         shock_hh= shocks(1,i);
         shock_r = shocks(2,i);
         shock_n = shocks(3,i);
-        
+    tic    
         % loop over states (216):
         for j = 1:1:length(SS)
             j
@@ -163,7 +173,7 @@ TVF = assets + wages + hhprod;
                 l_star(j) = Index_l;
                 V_star_aux(j) = V_star;
         end
-        
+     toc   
         % Integrate over shocks
         W(:,t)=pi^(-1/2)*V(:,:,t)*G.wt;
         Em(:,t,k) = detR*detV^(-1/2)*pi^(-(size(R,1))/2)*G.w(i)*G.w(j)*V + Em(:,t,k);

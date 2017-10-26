@@ -102,10 +102,16 @@ types = [kron(abi_levels',ones(length(edu_levels),1)) repmat(edu_levels',[length
 
 %% Shocks
 
-Ne = 3;
-[e, wt] = GaussHermite_2(Ne); % for each?
-eps_y=sqrt(2)*e*sigma_eps; % error vector
-eps_h=sqrt(2)*e*sigma_v;
+Ne = 3; % Gauss-Hermite Points
+[e, wt] = GaussHermite(Ne); % for each?
+sigma_eps  = sqrt(0.05); %shocks to income
+sigma_v   = sqrt(0);
+eps_y = sqrt(2)*e*sigma_eps; % error vector
+eps_h = sqrt(2)*e*sigma_v;
+vcv = [sigma_eps^2,0;0,sigma_v^2];
+detV = det(vcv);
+detV = det(vcv);
+detR = det(R);
 
 shock_r = [-1:1]; % sector R wages shock
 shock_n = [-1:1]; % sector N wages shock
@@ -168,4 +174,5 @@ SS_H = repmat(kron(hearnings',ones(length(assets)*length(childHC),1)),[length(wo
 SS_X = repmat(kron(workexp',ones(length(hearnings)*length(assets)*length(childHC),1)),[length(matstat) 1]);
 SS_N = kron(children',ones([length(childHC)*length(assets)*length(hearnings)*length(workexp),1]));
 SS_M = kron(matstat',ones([length(childHC)*length(assets)*length(hearnings)*length(workexp),1]));
+
 SS = [SS_M SS_N SS_X SS_H SS_A SS_K];
