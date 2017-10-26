@@ -38,17 +38,17 @@ for i = 1:1:length(ABC_func)
 end
 
 %Chevyshev
-M= 30; % points to evaluate objective function
+M= 5; % points to evaluate objective function
 ncheby = M-2;
-ncheb_pol=6;
+%ncheb_pol=6;
 
 %[S,B,inc_min_sim,inc_wage_sim,inc_sim,~,PI]=thci_ss(params0,G,P,epsy_sim);
-%%%%%% Bounds State Vectors %%%%%%%
-h1=[0,0,0,0];
-h2=[2.5,2.5,2.5,2.5];
-%a1=[0,0,0,0]; % with credit constraints
-a1(:,:)=[-inc(1,1)/(1+P.r)-inc(1,2)/(1+P.r)^2-inc(1,3)/(1+P.r)^3,-inc(1,2)/(1+P.r)-inc(1,3)/(1+P.r)^2,-inc(1,3)/(1+P.r),0];
-a2=[10,10,10,10]; 
+%%%%%% Bounds State Vectors %%%%%%% use same as above
+% h1=[0,0,0,0];
+% h2=[2.5,2.5,2.5,2.5];
+% %a1=[0,0,0,0]; % with credit constraints
+% a1(:,:)=[-inc(1,1)/(1+P.r)-inc(1,2)/(1+P.r)^2-inc(1,3)/(1+P.r)^3,-inc(1,2)/(1+P.r)-inc(1,3)/(1+P.r)^2,-inc(1,3)/(1+P.r),0];
+% a2=[10,10,10,10]; 
 %%% Chebyshev nodes and re-scaled state space vector
 z= flipud(cos(((2*(1:G.M)'-1)*pi)/(2*G.M))); % For Objective function 
 ext1 = -(z(1)+1)*(h2-h1)/2/z(1);   % parameter for expanded Chebyshev polynomial approximation 
@@ -64,7 +64,7 @@ aext(1,[1:G.ntime])=a1;
 hext(G.M,[1:G.ntime])=h2;
 aext(G.M,[1:G.ntime])=a2;
 for j=2:1:G.M-1
-   hext(j,[1:G.ntime])= extmin1 + (1+z(j))./dh;
+   hext(j,[1:G.ntime])= extmin1 + (1+z(j))./dh; %a_next_poly
    aext(j,[1:G.ntime])= extmin2 + (1+z(j))./da;
 end
 %%%%%%%% state vector       
@@ -74,28 +74,28 @@ S = struct('inc',inc,'inc_min',inc_min,'inc_wage',inc_wage,'h1',h1,'a1',a1,'extm
             'dh',dh,'da',da,'hext',hext,'aext',aext,'h_',h_,'a_',a_,'b',b,'lb',lb,'ubT',ubT,'a2',a2,'h2',h2);
 %%% Polynomial Bases and Derivatives %%%% 
 [B]=chebpoly_base(G.ncheby+1,z); %Polynomial base for Objective function
-T=kron(B,B);
-for t=1:1:G.ntime
-[dBh(:,:,t),dBa(:,:,t),ddBh(:,:,t),ddBa(:,:,t)]=Dchebpoly_deriv(G.ncheby+1,z,B,dh(t),da(1,t));
-end
+T=kron(B,kron(B,B));
+% for t=1:1:G.ntime
+% [dBh(:,:,t),dBa(:,:,t),ddBh(:,:,t),ddBa(:,:,t)]=Dchebpoly_deriv(G.ncheby+1,z,B,dh(t),da(1,t));
+% end
 %%% Polynomial Bases Policy Function %%%%
 % Basis for states
-B_sim=chebpoly_base(G.ncheb_pol,z);
-% Basis for Income Shocks
-z_epsw= 2*(G.eps_y(:,1)-G.eps_y(1,1))/(G.eps_y(G.Ne,1)-G.eps_y(1,1))-1; 
-B_ew=chebpoly_base(G.Ne-1,z_epsw);
-% Multidimensional base
-T_sim=kron(B_sim,kron(B_sim,B_ew));
-B  = struct('B',B,'dBh',dBh,'dBa',dBa,'ddBh',ddBh,'ddBa',ddBa,...
-            'B_sim',B_sim,'B_ew',B_ew,'T_sim',T_sim);
+% B_sim=chebpoly_base(G.ncheb_pol,z);
+% % Basis for Income Shocks
+% z_epsw= 2*(G.eps_y(:,1)-G.eps_y(1,1))/(G.eps_y(G.Ne,1)-G.eps_y(1,1))-1; 
+% B_ew=chebpoly_base(G.Ne-1,z_epsw);
+% % Multidimensional base
+% T_sim=kron(B_sim,kron(B_sim,B_ew));
+% B  = struct('B',B,'dBh',dBh,'dBa',dBa,'ddBh',ddBh,'ddBa',ddBa,...
+%             'B_sim',B_sim,'B_ew',B_ew,'T_sim',T_sim);
         
 %[W,A,Minv,Tinv,C]=thci_sol_grid20(params0,P,G,B,S)        
-W(:,G.ntime)=P.eta*S.h_(:,G.ntime).^(1-P.sigma)/(1-P.sigma)+ P.tau1*(1-exp(-S.a_(:,G.ntime))); 
+% W(:,G.ntime)=P.eta*S.h_(:,G.ntime).^(1-P.sigma)/(1-P.sigma)+ P.tau1*(1-exp(-S.a_(:,G.ntime))); 
 
 %for t=G.ntime-1:-1:1
 t=1;
-       coef1=W(:,t+1)'*kron(B.B,B.B);
-       aux=diag(B.B'*B.B)';
+       coef1=W(:,t+1)'*T %kron(B.B,B.B);
+       aux=diag(B.B'*B.B)'; %T
        aux2=kron(aux,aux);
        alp2(t,(1:(G.ncheby+1)^2))=coef1./aux2;
        

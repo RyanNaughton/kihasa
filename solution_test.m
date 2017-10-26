@@ -72,6 +72,9 @@ TVF = assets + wages + hhprod;
             wh_next = wh_j;
             K_next = K_j + inv;
             
+            % save wages in R and N for all states and all shocks
+            % wages_r_allstates = 216 x 23
+                
             % loop over consumption (5):
             for k = 1:1:length(c_vector)
                 k
@@ -169,13 +172,14 @@ TVF = assets + wages + hhprod;
                 
                 % save labor choice:
                 [V_star, Index_l] = max([V_r_star,V_n_star,V_u_star]);
-                c_star(j) = c_star_vector(Index_l); % add i to have 216 x 3?
-                l_star(j) = Index_l;
-                V_star_aux(j) = V_star;
+                c_star(j) = c_star_vector(Index_l); %add i to have 216 x 27
+                l_star(j) = Index_l; %add i to have 216 x 27
+                V_star_aux(j) = V_star; %in a matrix of 216 x 27
         end
      toc   
-        % Integrate over shocks
-        W(:,t)=pi^(-1/2)*V(:,:,t)*G.wt;
-        Em(:,t,k) = detR*detV^(-1/2)*pi^(-(size(R,1))/2)*G.w(i)*G.w(j)*V + Em(:,t,k);
     %end
+    
+    % Integrate over shocks
+    W(:,t)=pi^(-1/2)*V(:,:,t)*G.wt; 
+    Em(:,t,k) = detR*detV^(-1/2)*pi^(-(size(R,1))/2)*G.w(i)*G.w(j)*V + Em(:,t,k);
 %end

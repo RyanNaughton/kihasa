@@ -103,22 +103,27 @@ types = [kron(abi_levels',ones(length(edu_levels),1)) repmat(edu_levels',[length
 %% Shocks
 
 Ne = 3; % Gauss-Hermite Points
-[e, wt] = GaussHermite(Ne); % for each?
-sigma_eps  = sqrt(0.05); %shocks to income
-sigma_v   = sqrt(0);
-eps_y = sqrt(2)*e*sigma_eps; % error vector
-eps_h = sqrt(2)*e*sigma_v;
-vcv = [sigma_eps^2,0;0,sigma_v^2];
-detV = det(vcv);
-detV = det(vcv);
-detR = det(R);
+[e, wt] = GaussHermite(Ne);
+sigma_r = sqrt(0.05); %shocks to regular
+sigma_n = sqrt(0.05);
+sigma_i = sqrt(0.05);
 
-shock_r = [-1:1]; % sector R wages shock
-shock_n = [-1:1]; % sector N wages shock
-shock_hh= [-1:1]; % household income shock
+eps_r = sqrt(2)*e*sigma_r; % error vector
+eps_n = sqrt(2)*e*sigma_v;
+eps_i =
+
+% DON'T NEED THIS NOW, THEY'RE INDEPENDENT
+% vcv = [sigma_eps^2,0;0,sigma_v^2];
+% detV = det(vcv);
+% detV = det(vcv);
+% detR = det(R);
+
+% shock_r = [-1:1]; % sector R wages shock
+% shock_n = [-1:1]; % sector N wages shock
+% shock_hh= [-1:1]; % household income shock
 shocks = [kron(shock_hh',ones(length(shock_n)*length(shock_r),1))...
                 repmat(kron(shock_r',ones(length(shock_n),1)),[length(shock_hh) 1])...
-                repmat(shock_n',[length(shock_hh)*length(shock_r) 1])]; 
+                repmat(shock_n',[length(shock_hh)*length(shock_r) 1])]; % CHECK THIS w/Italo's board
 
 %% General Parameters
 
