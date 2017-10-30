@@ -6,17 +6,10 @@ A_vector = 1:5;
 B_vector = 1:5;
 C_vector = 1:5;
 
+% Bounds
 A_vector_wide = linspace(-1,10,length(A_vector));
 B_vector_wide = linspace(-1,10,length(B_vector));
 C_vector_wide = linspace(-1,10,length(C_vector));
-
-%%%%%%%% or adjust vector using this:
-% ubT= inc(1,3) + (1+P.r)*a_(:,3);
-% for j=1:G.nss
-%   c(j,:)= linspace(0,ubT(j),G.Nc);
-%   minv(j,:)= linspace(0,ubT(j),G.Nc);
-% end
-% tinv= [0,0.5,1];
 
 % Expand Vector
 SS_A = repmat(A_vector',[length(B_vector)*length(C_vector) 1]);
@@ -27,17 +20,17 @@ SS_C = kron(C_vector',ones([length(A_vector)*length(B_vector),1]));
 ABC_func = SS_A + SS_B + SS_C;
 rsp_func = reshape(ABC_func,[5,5,5]); %reshaped for linear interpolation
 
-%linear interpolation
+% Linear Interpolation
 for i = 1:1:length(ABC_func)
     
-    A_next = A_vector(i) + 0.1;
-    B_next = B_vector(i) + 0.5;
-    C_next = C_vector(i) + 0.9;
+    A_next = SS_A(i) + 0.1;
+    B_next = SS_B(i) + 0.5;
+    C_next = SS_C(i) + 0.9;
 
     linear(i) = interpn(A_vector_wide,B_vector_wide,C_vector_wide, rsp_func, A_next,B_next,C_next);
 end
 
-%Chevyshev
+% Chevyshev Approximation
 M= 5; % points to evaluate objective function
 ncheby = M-2;
 %ncheb_pol=6;
@@ -50,7 +43,7 @@ ncheby = M-2;
 % a1(:,:)=[-inc(1,1)/(1+P.r)-inc(1,2)/(1+P.r)^2-inc(1,3)/(1+P.r)^3,-inc(1,2)/(1+P.r)-inc(1,3)/(1+P.r)^2,-inc(1,3)/(1+P.r),0];
 % a2=[10,10,10,10]; 
 %%% Chebyshev nodes and re-scaled state space vector
-z= flipud(cos(((2*(1:G.M)'-1)*pi)/(2*G.M))); % For Objective function 
+z = flipud(cos(((2*(1:M)'-1)*pi)/(2*M))); % For Objective function 
 ext1 = -(z(1)+1)*(h2-h1)/2/z(1);   % parameter for expanded Chebyshev polynomial approximation 
 ext2 = -(z(1)+1)*(a2-a1)/2/z(1);   % parameter for expanded Chebyshev polynomial approximation 
 extmin1 = h1 - ext1;               % expanded minimal state value
@@ -111,4 +104,4 @@ t=1;
     %%%% these are the next values:
 %     apr=(1+P.r)*a + inc*(1-tinv) - P.p*minv - c;
 %     hpr=delta*CES(h,minv,tinv,gamma(t,:),rho,phi,0);  
-    EV=cheby_approx(alpha,G.ncheby,S.extmin1(t+1),S.extmin2(1,t+1),S.dh(t+1),S.da(1,t+1),hpr,apr)                       
+    EV=cheby_approx(alpha,G.ncheby,S.extmin1(t+1),S.extmin2(1,t+1),S.dh(t+1),S.da(1,t+1),hpr,apr);                       
