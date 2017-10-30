@@ -112,5 +112,3 @@ t=1;
 %     apr=(1+P.r)*a + inc*(1-tinv) - P.p*minv - c;
 %     hpr=delta*CES(h,minv,tinv,gamma(t,:),rho,phi,0);  
     EV=cheby_approx(alpha,G.ncheby,S.extmin1(t+1),S.extmin2(1,t+1),S.dh(t+1),S.da(1,t+1),hpr,apr)                       
-
-    

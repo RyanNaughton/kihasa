@@ -33,15 +33,15 @@ TVF = assets + wages + hhprod;
 %       minv(j,:)= linspace(0,ubT(j),G.Nc);
 %     end
 %     tinv= [0,0.5,1];
-    
+tic    
     % loop for shocks (27):
-    %for i = 1:1:G.n_shocks % 27 x 3
-        i=1;
+    for i = 1:1:G.n_shocks % 27 x 3
+        i
         
-        shock_hh= shocks(1,i);
-        shock_r = shocks(2,i);
-        shock_n = shocks(3,i);
-    tic    
+        shock_i = shocks_i(i);
+        shock_r = shocks_r(i);
+        shock_n = shocks_n(i);
+        
         % loop over states (216):
         for j = 1:1:length(SS)
             j
@@ -86,7 +86,7 @@ TVF = assets + wages + hhprod;
                 
                     % transitions:
                     X_next = X_j + 1;
-                    A_next = (1+r) * (A_j + (w_j_r + wh_j*m_j + shock_hh) - chh - n_j*inv); % eq. 8
+                    A_next = (1+r) * (A_j + (w_j_r + wh_j*m_j + shock_i) - chh - n_j*inv); % eq. 8
                     if prob_marr_r > 0.5
                         m_next = m_j + 1;
                         n_next = n_j + 1;
@@ -107,7 +107,7 @@ TVF = assets + wages + hhprod;
                 
                     % transitions:
                     X_next = X_j + 1;
-                    A_next = (1+r) * (A_j + (w_j_n + wh_j*m_j + shock_hh) - chh - n_j*inv);
+                    A_next = (1+r) * (A_j + (w_j_n + wh_j*m_j + shock_i) - chh - n_j*inv);
                     if prob_marr_n > 0.5
                         m_next = m_j + 1;
                         n_next = n_j + 1;
@@ -128,7 +128,7 @@ TVF = assets + wages + hhprod;
                     
                     % transitions:
                     X_next = X_j + 0;
-                    A_next = (1+r) * (A_j + (w_j_u + wh_j*m_j + shock_hh) - chh - n_j*inv);
+                    A_next = (1+r) * (A_j + (w_j_u + wh_j*m_j + shock_i) - chh - n_j*inv);
                     if prob_marr_u > 0.5
                         m_next = m_j + 1;
                         n_next = n_j + 1;
@@ -158,9 +158,9 @@ TVF = assets + wages + hhprod;
                     % Sector-Specific Value Functions:
                     V_r(k) = u_r(k) + beta * Emax;
                     V_n(k) = u_n(k) + beta * Emax;
-                    V_u(k) = u_u(k) + beta * Emax;
-                    
+                    V_u(k) = u_u(k) + beta * Emax;         
             end
+            
                 % save optimal V* & c*
                 [V_r_star, Index_r_k] = max(V_r);
                 [V_n_star, Index_n_k] = max(V_n);
@@ -172,14 +172,17 @@ TVF = assets + wages + hhprod;
                 
                 % save labor choice:
                 [V_star, Index_l] = max([V_r_star,V_n_star,V_u_star]);
-                c_star(j) = c_star_vector(Index_l); %add i to have 216 x 27
-                l_star(j) = Index_l; %add i to have 216 x 27
-                V_star_aux(j) = V_star; %in a matrix of 216 x 27
+                c_star(j, i) = c_star_vector(Index_l);
+                l_star(j, i) = Index_l;
+                V_star_aux(j, i) = V_star; 
+                
         end
-     toc   
-    %end
+        
+    end
     
     % Integrate over shocks
-    W(:,t)=pi^(-1/2)*V(:,:,t)*G.wt; 
-    Em(:,t,k) = detR*detV^(-1/2)*pi^(-(size(R,1))/2)*G.w(i)*G.w(j)*V + Em(:,t,k);
+%     W(:,t)=pi^(-1/2)*V(:,:,t)*G.wt; 
+%     Em(:,t,k) = detR*detV^(-1/2)*pi^(-(size(R,1))/2)*G.w(i)*G.w(j)*V + Em(:,t,k);
+    W = pi^(-1/2)*V_star_aux*weight;
+toc    
 %end

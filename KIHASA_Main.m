@@ -104,13 +104,13 @@ types = [kron(abi_levels',ones(length(edu_levels),1)) repmat(edu_levels',[length
 
 Ne = 3; % Gauss-Hermite Points
 [e, wt] = GaussHermite(Ne);
-sigma_r = sqrt(0.05); %shocks to regular
-sigma_n = sqrt(0.05);
-sigma_i = sqrt(0.05);
+sigma_r = sqrt(0.05); %shock to regular
+sigma_n = sqrt(0.05); %shock to non-regular
+sigma_i = sqrt(0.05); %shock to hh income
 
 eps_r = sqrt(2)*e*sigma_r; % error vector
-eps_n = sqrt(2)*e*sigma_v;
-eps_i =
+eps_n = sqrt(2)*e*sigma_n; % error vector
+eps_i = sqrt(2)*e*sigma_i; % error vector
 
 % DON'T NEED THIS NOW, THEY'RE INDEPENDENT
 % vcv = [sigma_eps^2,0;0,sigma_v^2];
@@ -118,12 +118,12 @@ eps_i =
 % detV = det(vcv);
 % detR = det(R);
 
-% shock_r = [-1:1]; % sector R wages shock
-% shock_n = [-1:1]; % sector N wages shock
-% shock_hh= [-1:1]; % household income shock
-shocks = [kron(shock_hh',ones(length(shock_n)*length(shock_r),1))...
-                repmat(kron(shock_r',ones(length(shock_n),1)),[length(shock_hh) 1])...
-                repmat(shock_n',[length(shock_hh)*length(shock_r) 1])]; % CHECK THIS w/Italo's board
+shocks_i = kron(eps_i,ones(length(eps_n)*length(eps_r),1));
+shocks_r = repmat(kron(eps_r,ones(length(eps_n),1)),[length(eps_i) 1]);
+shocks_n = repmat(eps_n,[length(eps_i)*length(eps_r) 1]);
+
+shocks = [shocks_i shocks_r shocks_n];
+weight = kron(wt, ones(length(wt)*length(wt),1)); % check how turn weights 3x1 into 27x1
 
 %% General Parameters
 
@@ -135,6 +135,7 @@ n_pop = 1000;
 G = struct('n_incond',n_incond,'n_period',n_period,'n_shocks',n_shocks,'n_pop',n_pop);
 
 %% QUESTIONS:
+
 %PARAMETERS BY AGE AND EDUCATION
 %PROBABILITY FUNCTIONS
 
