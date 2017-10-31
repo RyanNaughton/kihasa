@@ -23,8 +23,9 @@ TVF = assets + wages + hhprod;
         Emax = TVF;
     end
     
-    assets_wide = linspace(-5,10,n_ass);
+    assets_wide = linspace(-5,30,n_ass);
     childHC_wide = linspace(-5,10,n_childHC);
+    workexp_wide = linspace(-1,10,n_wrkexp);
     
     %%%%%%%%% this is how you adjust the linepsace
 %     ubT= inc(1,3) + (1+P.r)*a_(:,3);
@@ -101,7 +102,7 @@ tic
                     
                     % interpolated t+1:
                     tmp = reshape(TVF,[n_childHC,n_ass,n_hearn,n_wrkexp,n_matstat]);
-                    V_r_next = interpn(childHC_wide,assets_wide,hearnings,workexp,matstat, tmp, K_next,A_next,wh_next,X_next,m_next);
+                    V_r_next = interpn(childHC_wide,assets_wide,hearnings,workexp_wide,matstat, tmp, K_next,A_next,wh_next,X_next,m_next);
                     V_r_next
                 % non-regular job:
                 
@@ -122,7 +123,7 @@ tic
                     
                     % interpolated t+1:
                     tmp = reshape(TVF,[n_childHC,n_ass,n_hearn,n_wrkexp,n_matstat]);
-                    V_n_next = interpn(childHC_wide,assets_wide,hearnings,workexp,matstat, tmp, K_next,A_next,wh_next,X_next,m_next);
+                    V_n_next = interpn(childHC_wide,assets_wide,hearnings,workexp_wide,matstat, tmp, K_next,A_next,wh_next,X_next,m_next);
                     V_n_next
                 % unemployed:
                     
@@ -143,7 +144,7 @@ tic
                     
                     % interpolated t+1:
                     tmp = reshape(TVF,[n_childHC,n_ass,n_hearn,n_wrkexp,n_matstat]);
-                    V_u_next = interpn(childHC_wide,assets_wide,hearnings,workexp,matstat, tmp, K_next,A_next,wh_next,X_next,m_next);
+                    V_u_next = interpn(childHC_wide,assets_wide,hearnings,workexp_wide,matstat, tmp, K_next,A_next,wh_next,X_next,m_next);
                     V_u_next
                 % Value Functions:
                     
