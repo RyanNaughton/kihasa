@@ -21,9 +21,11 @@ TVF = assets + wages + hhprod;
     
     if t==G.n_period-1
         Emax = TVF;
+    else
+        Emax = W;
     end
     
-    assets_wide = linspace(-5,30,n_ass);
+    assets_wide = linspace(-5,30,n_ass); % probably going to change by period
     childHC_wide = linspace(-5,10,n_childHC);
     workexp_wide = linspace(-1,10,n_wrkexp);
     
@@ -62,19 +64,22 @@ tic
               
             % probabilities:      
             lambda_r = (edu + X_j + abi)/10; % currently has abi, shouldn't
-            pi_r = 0.2;
+            pi_r = 0.2; % one Emax for temporary/unemployed and one Emax for all
             
-            % sector-specific probabilities:
+            % sector-specific probabilities: % CHECK THIS WHEN AGE VARIES
             prob_marr_r = (edu + abi + 3 + t)/10; % only change with time & type
             prob_marr_n = (edu + abi + 2 + t)/10; % only change with time & type
             prob_marr_u = (edu + abi + 1 + t)/10; % only change with time & type
             
             % transitions for exogenous variables:
             wh_next = wh_j;
-            K_next = K_j + inv;
+            K_next = K_j + inv; % make a function (CES)
             
             % save wages in R and N for all states and all shocks
             % wages_r_allstates = 216 x 23
+            
+            % make consumption vector HERE (for each time-shock-state)
+            % from 0 to max potential assets
                 
             % loop over consumption (5):
             for k = 1:1:length(c_vector)
@@ -83,12 +88,19 @@ tic
                 chh = c_vector(k); % HH consumption
                 cw = (1+delta1*m_j+delta2*n_j)*chh; % woman's consumption - can this be larger than HH consumption?
                 
+                % make sure general experience accumulation can't be above
+                % the upper bound
+                % find the upper and lower bounds of assets (A_next could
+                % be) e.g. 
+                % need to make sure budget constraints is satisfied by e.g. 
+                % creating consumption vectors that fit within your budget
+                
                 % regular job:
                 
                     % transitions:
                     X_next = X_j + 1;
                     A_next = (1+r) * (A_j + (w_j_r + wh_j*m_j + shock_i) - chh - n_j*inv); % eq. 8
-                    if prob_marr_r > 0.5
+                    if prob_marr_r > 0.5 % uncomment assets_next for range
                         m_next = m_j + 1;
                         n_next = n_j + 1;
                     else
@@ -101,7 +113,7 @@ tic
                     end
                     
                     % interpolated t+1:
-                    tmp = reshape(TVF,[n_childHC,n_ass,n_hearn,n_wrkexp,n_matstat]);
+                    tmp = reshape(TVF,[n_childHC,n_ass,n_hearn,n_wrkexp,n_matstat]); % change TVF into Emax
                     V_r_next = interpn(childHC_wide,assets_wide,hearnings,workexp_wide,matstat, tmp, K_next,A_next,wh_next,X_next,m_next);
                     V_r_next
                 % non-regular job:
@@ -154,7 +166,7 @@ tic
                     u_u(k) = (cw^(1-sigma))/(1-sigma) + kappa*(1+theta1*m_j+theta2*n_j+theta3*K_j);
                     
                     % Expected Utility:
-                    Emax = max([V_r_next,V_n_next,V_u_next]);
+                    Emax = max([V_r_next,V_n_next,V_u_next]); %change Emax to EU
                     
                     % Sector-Specific Value Functions:
                     V_r(k) = u_r(k) + beta * Emax;

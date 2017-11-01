@@ -123,7 +123,7 @@ shocks_r = repmat(kron(eps_r,ones(length(eps_n),1)),[length(eps_i) 1]);
 shocks_n = repmat(eps_n,[length(eps_i)*length(eps_r) 1]);
 
 shocks = [shocks_i shocks_r shocks_n];
-weight = kron(wt, ones(length(wt)*length(wt),1)); % check how turn weights 3x1 into 27x1
+weight = kron(wt, kron(wt,wt)); % 27x1
 
 %% General Parameters
 
