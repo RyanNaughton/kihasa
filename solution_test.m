@@ -16,8 +16,8 @@ TVF = assets + wages + hhprod;
 %P.tau1*(1-exp(-S.a_(:,G.ntime)));
 
 % loop for time (25):
-%for t = G.n_period-1:-1:1
-    t=1;
+for t = G.n_period-1:-1:1
+    t
     
     if t==G.n_period-1
         Emax = TVF;
@@ -36,7 +36,7 @@ TVF = assets + wages + hhprod;
 %       minv(j,:)= linspace(0,ubT(j),G.Nc);
 %     end
 %     tinv= [0,0.5,1];
-tic    
+    
     % loop for shocks (27):
     for i = 1:1:G.n_shocks % 27 x 3
         i
@@ -67,9 +67,9 @@ tic
             pi_r = 0.2; % one Emax for temporary/unemployed and one Emax for all
             
             % sector-specific probabilities: % CHECK THIS WHEN AGE VARIES
-            prob_marr_r = (edu + abi + 3 + t)/10; % only change with time & type
-            prob_marr_n = (edu + abi + 2 + t)/10; % only change with time & type
-            prob_marr_u = (edu + abi + 1 + t)/10; % only change with time & type
+            prob_marr_r = (edu + abi + 35 + t)/100; % only change with time & type
+            prob_marr_n = (edu + abi + 30 + t)/100; % only change with time & type
+            prob_marr_u = (edu + abi + 25 + t)/100; % only change with time & type
             
             % transitions for exogenous variables:
             wh_next = wh_j;
@@ -99,8 +99,8 @@ tic
                 
                     % transitions:
                     X_next = X_j + 1;
-                    A_next = (1+r) * (A_j + (w_j_r + wh_j*m_j + shock_i) - chh - n_j*inv); % eq. 8
-                    if prob_marr_r > 0.5 % uncomment assets_next for range
+                    A_next = (1+r) * (A_j + (w_j_r + wh_j*m_j + shock_i) - chh - n_j*inv) % eq. 8
+                    if prob_marr_r > 0.5
                         m_next = m_j + 1;
                         n_next = n_j + 1;
                     else
@@ -113,7 +113,7 @@ tic
                     end
                     
                     % interpolated t+1:
-                    tmp = reshape(TVF,[n_childHC,n_ass,n_hearn,n_wrkexp,n_matstat]); % change TVF into Emax
+                    tmp = reshape(Emax,[n_childHC,n_ass,n_hearn,n_wrkexp,n_matstat]);
                     V_r_next = interpn(childHC_wide,assets_wide,hearnings,workexp_wide,matstat, tmp, K_next,A_next,wh_next,X_next,m_next);
                     V_r_next
                 % non-regular job:
@@ -134,7 +134,7 @@ tic
                     end
                     
                     % interpolated t+1:
-                    tmp = reshape(TVF,[n_childHC,n_ass,n_hearn,n_wrkexp,n_matstat]);
+                    tmp = reshape(Emax,[n_childHC,n_ass,n_hearn,n_wrkexp,n_matstat]);
                     V_n_next = interpn(childHC_wide,assets_wide,hearnings,workexp_wide,matstat, tmp, K_next,A_next,wh_next,X_next,m_next);
                     V_n_next
                 % unemployed:
@@ -155,7 +155,7 @@ tic
                     end
                     
                     % interpolated t+1:
-                    tmp = reshape(TVF,[n_childHC,n_ass,n_hearn,n_wrkexp,n_matstat]);
+                    tmp = reshape(Emax,[n_childHC,n_ass,n_hearn,n_wrkexp,n_matstat]);
                     V_u_next = interpn(childHC_wide,assets_wide,hearnings,workexp_wide,matstat, tmp, K_next,A_next,wh_next,X_next,m_next);
                     V_u_next
                 % Value Functions:
@@ -166,12 +166,12 @@ tic
                     u_u(k) = (cw^(1-sigma))/(1-sigma) + kappa*(1+theta1*m_j+theta2*n_j+theta3*K_j);
                     
                     % Expected Utility:
-                    Emax = max([V_r_next,V_n_next,V_u_next]); %change Emax to EU
+                    EU = max([V_r_next,V_n_next,V_u_next]);
                     
                     % Sector-Specific Value Functions:
-                    V_r(k) = u_r(k) + beta * Emax;
-                    V_n(k) = u_n(k) + beta * Emax;
-                    V_u(k) = u_u(k) + beta * Emax;         
+                    V_r(k) = u_r(k) + beta * EU;
+                    V_n(k) = u_n(k) + beta * EU;
+                    V_u(k) = u_u(k) + beta * EU;         
             end
             
                 % save optimal V* & c*
@@ -185,9 +185,9 @@ tic
                 
                 % save labor choice:
                 [V_star, Index_l] = max([V_r_star,V_n_star,V_u_star]);
-                c_star(j, i) = c_star_vector(Index_l);
-                l_star(j, i) = Index_l;
-                V_star_aux(j, i) = V_star; 
+                c_star(j, i, t) = c_star_vector(Index_l);
+                l_star(j, i, t) = Index_l;
+                V_star_aux(j, i, t) = V_star; 
                 
         end
         
@@ -196,6 +196,5 @@ tic
     % Integrate over shocks
 %     W(:,t)=pi^(-1/2)*V(:,:,t)*G.wt; 
 %     Em(:,t,k) = detR*detV^(-1/2)*pi^(-(size(R,1))/2)*G.w(i)*G.w(j)*V + Em(:,t,k);
-    W = pi^(-1/2)*V_star_aux*weight;
-toc    
-%end
+    W = pi^(-1/2)*V_star_aux(:,:,t)*weight;   
+end
