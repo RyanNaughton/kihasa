@@ -145,20 +145,23 @@ G = struct('n_incond',n_incond,'n_period',n_period,'n_shocks',n_shocks,'n_pop',n
 
 ass_lb = 1;
 ass_up = 5;
-n_ass = 3;
+n_ass = 10;
 assets = linspace(ass_lb,ass_up,n_ass);
 
 matstat = [0 1];
 n_matstat = length(matstat);
 
-workexp = [1:4];
+workexp = [1:10];
 workexp_r = [1:3];
 workexp_n = [1:3];
 n_wrkexp = length(workexp);
 
 sector = [1:3];
 
-c_vector = [1:3];
+c_min = 0;
+c_max = 5;
+c_n = 20;
+c_vector = linspace(c_min,c_max,c_n);
 
 %Exogenous
 
@@ -166,12 +169,12 @@ children = [0 1];
 
 hearn_lb = 1;
 hearn_ub = 5;
-n_hearn = 3;
+n_hearn = 5;
 hearnings = linspace(hearn_lb,hearn_ub,n_hearn);
 
 childHC_lb = 1.1;
 childHC_ub = 4.5;
-n_childHC = 3;
+n_childHC = 5;
 childHC = linspace(childHC_lb,childHC_ub,n_childHC);
 
 SS_K = repmat(childHC',[length(assets)*length(hearnings)*length(workexp)*length(matstat) 1]);

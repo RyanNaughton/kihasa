@@ -14,18 +14,18 @@ hhprod = (SS_M+1).^theta1 .* (SS_N+1).^theta2 .* SS_K;
 TVF = assets + wages + hhprod;
 %W(:,G.ntime)=P.eta*S.h_(:,G.ntime).^(1-P.sigma)/(1-P.sigma)+
 %P.tau1*(1-exp(-S.a_(:,G.ntime)));
-
+tic
 % loop for time (25):
 for t = G.n_period-1:-1:1
     t
-    
+    toc
     if t==G.n_period-1
         Emax = TVF;
     else
         Emax = W;
     end
     
-    assets_wide = linspace(-5,30,n_ass); % probably going to change by period
+    assets_wide = linspace(-5,100,n_ass); % probably going to change by period
     childHC_wide = linspace(-5,10,n_childHC);
     workexp_wide = linspace(-1,10,n_wrkexp);
     
@@ -47,7 +47,7 @@ for t = G.n_period-1:-1:1
         
         % loop over states (216):
         for j = 1:1:length(SS)
-            j
+            j;
             
             % current state variables:
             m_j = SS_M(j);  % marital status
@@ -83,7 +83,7 @@ for t = G.n_period-1:-1:1
                 
             % loop over consumption (5):
             for k = 1:1:length(c_vector)
-                k
+                k;
                 
                 chh = c_vector(k); % HH consumption
                 cw = (1+delta1*m_j+delta2*n_j)*chh; % woman's consumption - can this be larger than HH consumption?
@@ -99,7 +99,7 @@ for t = G.n_period-1:-1:1
                 
                     % transitions:
                     X_next = X_j + 1;
-                    A_next = (1+r) * (A_j + (w_j_r + wh_j*m_j + shock_i) - chh - n_j*inv) % eq. 8
+                    A_next = (1+r) * (A_j + (w_j_r + wh_j*m_j + shock_i) - chh - n_j*inv); % eq. 8
                     if prob_marr_r > 0.5
                         m_next = m_j + 1;
                         n_next = n_j + 1;
@@ -115,7 +115,7 @@ for t = G.n_period-1:-1:1
                     % interpolated t+1:
                     tmp = reshape(Emax,[n_childHC,n_ass,n_hearn,n_wrkexp,n_matstat]);
                     V_r_next = interpn(childHC_wide,assets_wide,hearnings,workexp_wide,matstat, tmp, K_next,A_next,wh_next,X_next,m_next);
-                    V_r_next
+                    
                 % non-regular job:
                 
                     % transitions:
@@ -136,7 +136,7 @@ for t = G.n_period-1:-1:1
                     % interpolated t+1:
                     tmp = reshape(Emax,[n_childHC,n_ass,n_hearn,n_wrkexp,n_matstat]);
                     V_n_next = interpn(childHC_wide,assets_wide,hearnings,workexp_wide,matstat, tmp, K_next,A_next,wh_next,X_next,m_next);
-                    V_n_next
+                    
                 % unemployed:
                     
                     % transitions:
@@ -157,7 +157,7 @@ for t = G.n_period-1:-1:1
                     % interpolated t+1:
                     tmp = reshape(Emax,[n_childHC,n_ass,n_hearn,n_wrkexp,n_matstat]);
                     V_u_next = interpn(childHC_wide,assets_wide,hearnings,workexp_wide,matstat, tmp, K_next,A_next,wh_next,X_next,m_next);
-                    V_u_next
+                    
                 % Value Functions:
                     
                     % Sector-Specific Utility:
