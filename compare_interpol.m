@@ -1,4 +1,4 @@
-clear all; %clc;
+clear all; clc;
 
 % Testing:
 a1=0;
@@ -9,14 +9,14 @@ c1=5;
 c2=8;
 
 % Linear Vectors
-A_vector = 1:10;
-B_vector = 1:10;
-C_vector = 1:10;
+A_vector = Aext; %1:10;
+B_vector = Bext; %1:10;
+C_vector = Cext; %1:10;
 
 % Bounds
-A_vector_wide = linspace(1,11,length(A_vector));
-B_vector_wide = linspace(1,11,length(B_vector));
-C_vector_wide = linspace(1,11,length(C_vector));
+A_vector_wide = linspace(0,11,length(A_vector));
+B_vector_wide = linspace(0,11,length(B_vector));
+C_vector_wide = linspace(0,11,length(C_vector));
 
 % Expand Vector
 SS_A = repmat(A_vector',[length(B_vector)*length(C_vector) 1]);
@@ -89,16 +89,20 @@ aux = diag(T'*T)'; %square of T
 Den = kron(aux, kron(aux,aux));
 alpha(1,(1:(ncheby+1)^3)) = Num./Den; % (9X9x9) = 729 coefficients
 
+alp0=alpha*0;
+% use fmincon(alpha, chebcoeff_obj(ABC_func,alpha,B)), alpha = 0
+nss = length(ABC_func); % needs to be in the function
+alpha2=fmincon(@(alpha2) chebcoef_obj(ABC_func,alpha2,nss,B),alp0);
+
 tic
 % Chebyshev Approximation
 for i = 1:1:length(ABC_func)
-    A_next = A_(1) + 0.1;
-    B_next = B_(1) + 0.5;
-    C_next = C_(1) + 0.9;
+    A_next = A_(i) + 0.1;
+    B_next = B_(i) + 0.5;
+    C_next = C_(i) + 0.9;
     EV(i) = cheby_approx(alpha,ncheby,extminA,extminB,extminC,dA,dB,dC,A_next,B_next,C_next); %Elapsed time is 0.032402 seconds.
+    EV2(i) = cheby_approx(alpha2,ncheby,extminA,extminB,extminC,dA,dB,dC,A_next,B_next,C_next);
 end
 toc %Elapsed time is 0.15 seconds.
 
-% use fmincon(alpha, chebcoeff_obj(ABC_func,alpha,B)), alpha = 0
-nss = length(ABC_func); % needs to be in the function
-fmincon(chebcoef_obj(ABC_func,alpha,B));
+%% compare this using 5 variables (10)

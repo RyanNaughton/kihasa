@@ -1,4 +1,4 @@
-function [f]=chebcoef_obj(fun,alpha,B)
+function [f]=chebcoef_obj(fun,alpha,nss,T)
 % Function specifies the OLS minimization between the real Expected Value function
 % to be approximated and its approximation using the product between chebyshev coefficients 
 % and the tensor product of the polynomial bases.
@@ -19,5 +19,5 @@ function [f]=chebcoef_obj(fun,alpha,B)
 for i=1:nss
     aux(i,1)= sum(alpha.*T(i,:));
 end
-f=sum((fun(:,t)- aux).^2);
+f=sum((fun- aux).^2);
 
