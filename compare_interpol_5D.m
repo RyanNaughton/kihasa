@@ -13,7 +13,7 @@ e1=4;
 e2=6;
 
 % Chevyshev Approximation
-M = 10; % points to evaluate objective function
+M = 7; % points to evaluate objective function
 ncheby = M-2; %degrees
 
 %%% Chebyshev nodes and re-scaled state space vector
@@ -79,10 +79,6 @@ D_vector_wide = linspace(0,11,length(D_vector));
 E_vector_wide = linspace(0,11,length(E_vector));
 
 % Expand Vector
-% SS_A = repmat(A_vector',[length(B_vector)*length(C_vector) 1]);
-% SS_B = repmat(kron(B_vector',ones(length(C_vector),1)),[length(A_vector) 1]);
-% SS_C = kron(C_vector',ones([length(A_vector)*length(B_vector),1]));
-
 SS_A = repmat(A_vector',[length(B_vector)*length(C_vector)*length(D_vector)*length(E_vector) 1]);
 SS_B = repmat(kron(B_vector',ones(length(A_vector),1)),[length(C_vector)*length(D_vector)*length(E_vector) 1]);
 SS_C = repmat(kron(C_vector',ones(length(B_vector)*length(A_vector),1)),[length(D_vector)*length(E_vector) 1]);
@@ -91,7 +87,7 @@ SS_E = kron(E_vector',ones([length(A_vector)*length(B_vector)*length(C_vector)*l
 
 % Function
 ABC_func = SS_A + SS_B + SS_C + SS_D + SS_E;
- %reshaped for linear interpolation
+% reshaped for linear interpolation
 rsp_func = reshape(ABC_func,[length(A_vector),length(B_vector),length(C_vector),length(D_vector),length(E_vector)]);
 
 tic
@@ -100,7 +96,7 @@ for i = 1:1:length(ABC_func)
     A_next = SS_A(i) + 0.1;
     B_next = SS_B(i) + 0.5;
     C_next = SS_C(i) + 0.9;
-    D_next = SS_D(i) + 0.5;
+    D_next = SS_D(i) + 0.3;
     E_next = SS_E(i) + 0.7;
     linear(i) = interpn(A_vector_wide,B_vector_wide,C_vector_wide,D_vector_wide,E_vector_wide, rsp_func, A_next,B_next,C_next,D_next,E_next);
 end
@@ -108,38 +104,41 @@ toc %Elapsed time is 0.998017 seconds.
 
 %%% Polynomial Bases and Derivatives %%%% 
 T = chebpoly_base(ncheby+1,z); % base for Objective function
-B = kron(T, kron(T,T)); % half of the numerator of the coeff
+B = kron(T, kron(T, kron(T, kron(T,T)))); % half of the numerator of the coeff
 Num = ABC_func'*B; % numerator (bases*function) 
-aux = diag(T'*T)'; %square of T
-Den = kron(aux, kron(aux,aux));
-alpha(1,(1:(ncheby+1)^3)) = Num./Den; % (9X9x9) = 729 coefficients
-
-% % expand the vectors as above (14)
-% A_ = repmat(Aext',[length(Bext)*length(Cext) 1]);
-% B_ = repmat(kron(Bext',ones(length(Cext),1)),[length(Aext) 1]);
-% C_ = kron(Cext',ones([length(Aext)*length(Bext),1]));
-% 
-% % function
-% ABC_func = A_ + B_ + C_;
-
-%algorithm
-alp0 = alpha*0;
-nss = length(ABC_func);
-alpha2 = fmincon(@(alpha2) chebcoef_obj(ABC_func,alpha2,nss,B), alp0);
+aux = diag(T'*T)'; % square of T
+Den = kron(aux, kron(aux, kron(aux, kron(aux,aux))));
+alpha(1,(1:(ncheby+1)^5)) = Num./Den; % (9x9x9x9x9) = 59049 coefficients
 
 tic
 % Chebyshev Approximation
 for i = 1:1:length(ABC_func)
-    A_next = A_(i) + 0.1;
-    B_next = B_(i) + 0.5;
-    C_next = C_(i) + 0.9;
-    EV(i) = cheby_approx(alpha,ncheby,extminA,extminB,extminC,dA,dB,dC,A_next,B_next,C_next);
-    EV2(i) = cheby_approx(alpha2,ncheby,extminA,extminB,extminC,dA,dB,dC,A_next,B_next,C_next);
+    A_next = SS_A(i) + 0.1;
+    B_next = SS_B(i) + 0.5;
+    C_next = SS_C(i) + 0.9;
+    D_next = SS_D(i) + 0.3;
+    E_next = SS_E(i) + 0.7;
+    EV(i) = cheby_approx_5D(alpha,ncheby,extminA,extminB,extminC,extminD,extminE,dA,dB,dC,dD,dE,A_next,B_next,C_next,D_next,E_next);
 end
 toc %Elapsed time is 0.121253 seconds.
+% 
+% %algorithm
+% alp0 = alpha*0;
+% nss = length(ABC_func);
+% alpha2 = fmincon(@(alpha2) chebcoef_obj(ABC_func,alpha2,nss,B), alp0);
+% tic
+% for i = 1:1:length(ABC_func)
+%     A_next = SS_A(i) + 0.1;
+%     B_next = SS_B(i) + 0.5;
+%     C_next = SS_C(i) + 0.9;
+%     D_next = SS_D(i) + 0.3;
+%     E_next = SS_E(i) + 0.7;
+%     EV2(i) = cheby_approx(alpha2,ncheby,extminA,extminB,extminC,dA,dB,dC,A_next,B_next,C_next);
+% end
+% toc
 
 %% compare this using 5 variables (10)
-x = 1:1000;
+x = 1:7^5;
 plot(x,ABC_func)
 plot(x,ABC_func,x,linear)
 plot(x,ABC_func,x,linear,x,EV)

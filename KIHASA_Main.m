@@ -185,3 +185,5 @@ SS_N = kron(children',ones([length(childHC)*length(assets)*length(hearnings)*len
 SS_M = kron(matstat',ones([length(childHC)*length(assets)*length(hearnings)*length(workexp),1]));
 
 SS = [SS_M SS_N SS_X SS_H SS_A SS_K];
+
+save solutiontest.mat;
