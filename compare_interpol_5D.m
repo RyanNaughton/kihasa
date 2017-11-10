@@ -121,24 +121,28 @@ for i = 1:1:length(ABC_func)
     EV(i) = cheby_approx_5D(alpha,ncheby,extminA,extminB,extminC,extminD,extminE,dA,dB,dC,dD,dE,A_next,B_next,C_next,D_next,E_next);
 end
 toc %Elapsed time is 0.121253 seconds.
-% 
-% %algorithm
-% alp0 = alpha*0;
-% nss = length(ABC_func);
-% alpha2 = fmincon(@(alpha2) chebcoef_obj(ABC_func,alpha2,nss,B), alp0);
-% tic
-% for i = 1:1:length(ABC_func)
-%     A_next = SS_A(i) + 0.1;
-%     B_next = SS_B(i) + 0.5;
-%     C_next = SS_C(i) + 0.9;
-%     D_next = SS_D(i) + 0.3;
-%     E_next = SS_E(i) + 0.7;
-%     EV2(i) = cheby_approx(alpha2,ncheby,extminA,extminB,extminC,dA,dB,dC,A_next,B_next,C_next);
-% end
-% toc
+
+%algorithm
+alp0 = alpha*0;
+nss = length(ABC_func);
+tic
+alpha2 = fmincon(@(alpha2) chebcoef_obj(ABC_func,alpha2,nss,B), alp0);
+toc
+
+tic
+for i = 1:1:length(ABC_func)
+    A_next = SS_A(i) + 0.1;
+    B_next = SS_B(i) + 0.5;
+    C_next = SS_C(i) + 0.9;
+    D_next = SS_D(i) + 0.3;
+    E_next = SS_E(i) + 0.7;
+    EV2(i) =  cheby_approx_5D(alpha2,ncheby,extminA,extminB,extminC,extminD,extminE,dA,dB,dC,dD,dE,A_next,B_next,C_next,D_next,E_next);
+end
+toc %Elapsed time is 4.155648 seconds.
 
 %% compare this using 5 variables (10)
-x = 1:7^5;
+
+x = 1:M^5;
 plot(x,ABC_func)
 plot(x,ABC_func,x,linear)
 plot(x,ABC_func,x,linear,x,EV)

@@ -102,7 +102,7 @@ toc %Elapsed time is 0.15 seconds.
 
 %% compare
 
-x = 1:1000;
+x = 1:M^3;
 plot(x,ABC_func)
 plot(x,ABC_func,x,linear)
 plot(x,ABC_func,x,linear,x,EV)
