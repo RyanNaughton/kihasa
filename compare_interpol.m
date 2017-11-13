@@ -51,12 +51,12 @@ A_vector = Aext; %1:10;
 B_vector = Bext; %1:10;
 C_vector = Cext; %1:10;
 
-% Bounds
+% Expanded Bounds (for the linear interpolation)
 A_vector_wide = linspace(0,11,length(A_vector));
 B_vector_wide = linspace(0,11,length(B_vector));
 C_vector_wide = linspace(0,11,length(C_vector));
 
-% Expand Vector
+% Expand Vector (to calculate function)
 SS_A = repmat(A_vector',[length(B_vector)*length(C_vector) 1]);
 SS_B = repmat(kron(B_vector',ones(length(C_vector),1)),[length(A_vector) 1]);
 SS_C = kron(C_vector',ones([length(A_vector)*length(B_vector),1]));
@@ -65,6 +65,19 @@ SS_C = kron(C_vector',ones([length(A_vector)*length(B_vector),1]));
 ABC_func = SS_A + SS_B + SS_C;
 %reshaped for linear interpolation
 rsp_func = reshape(ABC_func,[length(A_vector),length(B_vector),length(C_vector)]);
+
+%%% Polynomial Bases and Derivatives %%%% 
+T = chebpoly_base(ncheby+1,z); % base for Objective function
+B = kron(T, kron(T,T)); % half of the numerator of the coeff
+Num = ABC_func'*B; % numerator (bases*function) 
+aux = diag(T'*T)'; % square of T
+Den = kron(aux, kron(aux,aux));
+alpha(1,(1:(ncheby+1)^3)) = Num./Den; % (9X9x9) = 729 coefficients
+
+%algorithm
+alp0=alpha*0;
+nss = length(ABC_func);
+alpha2=fmincon(@(alpha2) chebcoef_obj(ABC_func,alpha2,nss,B),alp0);
 
 tic
 % Linear Interpolation
@@ -75,19 +88,6 @@ for i = 1:1:length(ABC_func)
     linear(i) = interpn(A_vector_wide,B_vector_wide,C_vector_wide, rsp_func, A_next,B_next,C_next);
 end
 toc %Elapsed time is 1 seconds.
-
-%%% Polynomial Bases and Derivatives %%%% 
-T = chebpoly_base(ncheby+1,z); % base for Objective function
-B = kron(T, kron(T,T)); % half of the numerator of the coeff
-Num = ABC_func'*B; % numerator (bases*function) 
-aux = diag(T'*T)'; %square of T
-Den = kron(aux, kron(aux,aux));
-alpha(1,(1:(ncheby+1)^3)) = Num./Den; % (9X9x9) = 729 coefficients
-
-%algorithm
-alp0=alpha*0;
-nss = length(ABC_func);
-alpha2=fmincon(@(alpha2) chebcoef_obj(ABC_func,alpha2,nss,B),alp0);
 
 tic
 % Chebyshev Approximation
@@ -101,7 +101,6 @@ end
 toc %Elapsed time is 0.15 seconds.
 
 %% compare
-
 x = 1:M^3;
 plot(x,ABC_func)
 plot(x,ABC_func,x,linear)

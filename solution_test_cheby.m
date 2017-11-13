@@ -7,13 +7,12 @@ n=1;
 % Terminal Value Function:
 % TVF = A_T + W_T + Q_T = assets + wages + HH_production
 
-assets = SS_A; % just the vector of all possible assets, not a function
+assets = SS_A; 
 wages = exp(alpha1*SS_X + alpha2*edu + abi);
 hhprod = (SS_M+1).^theta1 .* (SS_N+1).^theta2 .* SS_K;
-
+% matrix of J=10x5x5=500 rows and 10x2=20 cols
 TVF = assets + wages + hhprod;
-%W(:,G.ntime)=P.eta*S.h_(:,G.ntime).^(1-P.sigma)/(1-P.sigma)+
-%P.tau1*(1-exp(-S.a_(:,G.ntime)));
+
 tic
 % loop for time (25):
 for t = G.n_period-1:-1:1
@@ -25,16 +24,20 @@ for t = G.n_period-1:-1:1
         Emax = W;
     end
     
-    % 20 coefficients (2 matstat x 10 years)
-    % base for assets (M = 15)
-    % base for child human capital (M = 5)
-    % base for husband's earnigns (M = 5)
+    % Chevyshev Approximation
+    B = kron(T_A, kron(T_H,T_K)); % half of the numerator of the coeff
+    Num = TVF'*B; % TVF'*kron(T_A, kron(T_H,T_K)); % numerator (bases*function) 
+    Den = kron(T2_A, kron(T2_H,T2_K)); % square of T multiplied
+    for x = 1:1:(n_matstat*n_wrkexp)
+        alpha(x,:) = Num(x,:)./Den';
+    end
+    % alpha contains 20 rows of 19x4x4 = 304 coefficients
     
     % maybe won't need this
-    assets_wide = linspace(-5,100,n_ass); % probably going to change by period
-    childHC_wide = linspace(-5,10,n_childHC);
-    workexp_wide = linspace(-1,10,n_wrkexp);
-    
+    assets_wide = linspace(-5,100,n_assets); % probably going to change by period
+    childHC_wide = linspace(-5,10,n_childK);
+    workexp_wide = linspace(-1,10,n_wrkexp);    
+
     % loop for shocks (27):
     for i = 1:1:G.n_shocks % 27 x 3
         i
@@ -43,17 +46,23 @@ for t = G.n_period-1:-1:1
         shock_r = shocks_r(i);
         shock_n = shocks_n(i);
         
+        % loop for work experience and marital status (20):
+        for x = 1:1:(n_matstat*n_wrkexp)
+            x;
+            coeffs = alpha(1,:);
+            % current state variables:
+            m_j = SS_M(x);  % marital status
+            n_j = SS_N(x);  % children
+            X_j = SS_X(x);  % experience
+         
         % loop over states (20 assets x 5 child HC x 5 husband wages = 500):
-        for j = 1:1:length(SS)
+        for j = 1:1:length(SS_rows)
             j;
             
             % current state variables:
-            m_j = SS_M(j);  % marital status
-            n_j = SS_N(j);  % children
-            X_j = SS_X(j);  % experience
             wh_j = SS_H(j); % husband's wage
             A_j = SS_A(j);  % HH's assets
-            K_j = SS(j,6);  % HC of child
+            K_j = SS_K(j);  % HC of child
             
             % sector-specific state variables:
             w_j_r = exp(alpha1*X_j + alpha2*edu + abi + shock_r); % same
@@ -79,7 +88,7 @@ for t = G.n_period-1:-1:1
             
             % make consumption vector HERE (for each time-shock-state)
             % from 0 to max potential assets
-            
+            %c_vector = ;
     %%%%%%%%% this is how you adjust the linepsace
 %     ubT= inc(1,3) + (1+P.r)*a_(:,3);
 %     for j=1:G.nss
@@ -95,16 +104,10 @@ for t = G.n_period-1:-1:1
                 chh = c_vector(k); % HH consumption
                 cw = (1+delta1*m_j+delta2*n_j)*chh; % woman's consumption - can this be larger than HH consumption?
                 
-                % make sure general experience accumulation can't be above
-                % the upper bound
-                % find the upper and lower bounds of assets (A_next could
-                % be) e.g. 
-                % need to make sure budget constraints is satisfied by e.g. 
-                % creating consumption vectors that fit within your budget
-                
-                % regular job:
-                
-                    % transitions:
+                % single:
+                if x <= 10
+                    
+                    % regular job:
                     X_next = X_j + 1;
                     A_next = (1+r) * (A_j + (w_j_r + wh_j*m_j + shock_i) - chh - n_j*inv); % eq. 8
                     if prob_marr_r > 0.5
@@ -119,13 +122,10 @@ for t = G.n_period-1:-1:1
                         n_next = 1;
                     end
                     
-                    % interpolated t+1:
-                    tmp = reshape(Emax,[n_childHC,n_ass,n_hearn,n_wrkexp,n_matstat]);
+                    % value function:
                     V_r_next = interpn(childHC_wide,assets_wide,hearnings,workexp_wide,matstat, tmp, K_next,A_next,wh_next,X_next,m_next);
-                    
-                % non-regular job:
-                
-                    % transitions:
+
+                    % non-regular job:
                     X_next = X_j + 1;
                     A_next = (1+r) * (A_j + (w_j_n + wh_j*m_j + shock_i) - chh - n_j*inv);
                     if prob_marr_n > 0.5
@@ -140,16 +140,12 @@ for t = G.n_period-1:-1:1
                         n_next = 1;
                     end
                     
-                    % interpolated t+1:
-                    tmp = reshape(Emax,[n_childHC,n_ass,n_hearn,n_wrkexp,n_matstat]);
+                    % value function:
                     V_n_next = interpn(childHC_wide,assets_wide,hearnings,workexp_wide,matstat, tmp, K_next,A_next,wh_next,X_next,m_next);
                     
-                % unemployed:
-                    
-                    % transitions:
+                    % unemployed:
                     X_next = X_j + 0;
                     A_next = (1+r) * (A_j + (w_j_u + wh_j*m_j + shock_i) - chh - n_j*inv);
-                    % save A_next for the vector of consumption
                     if prob_marr_u > 0.5
                         m_next = m_j + 1;
                         n_next = n_j + 1;
@@ -162,11 +158,36 @@ for t = G.n_period-1:-1:1
                         n_next = 1;
                     end
                     
-                    % interpolated t+1:
-                    tmp = reshape(Emax,[n_childHC,n_ass,n_hearn,n_wrkexp,n_matstat]);
+                    % value function:
                     V_u_next = interpn(childHC_wide,assets_wide,hearnings,workexp_wide,matstat, tmp, K_next,A_next,wh_next,X_next,m_next);
                     
-                % Value Functions:
+                else   
+                % Married:
+                
+                    % Regular:
+                    X_next = X_j + 1;
+                    A_next = (1+r) * (A_j + (w_j_r + wh_j*m_j + shock_i) - chh - n_j*inv);
+                    m_next = m_j;
+                    n_next = n_j;
+                    Vm_r_next = ;
+                    
+                    % Non-regular:
+                    X_next = X_j + 1;
+                    A_next = (1+r) * (A_j + (w_j_n + wh_j*m_j + shock_i) - chh - n_j*inv);
+                    m_next = m_j;
+                    n_next = n_j;
+                    Vm_n_next = ;
+                    
+                    % Unemployed:
+                    X_next = X_j + 0;
+                    A_next = (1+r) * (A_j + (w_j_u + wh_j*m_j + shock_i) - chh - n_j*inv);
+                    m_next = m_j;
+                    n_next = n_j;
+                    Vm_u_next = ;
+                    
+                end
+                
+                % Together:
                     
                     % Sector-Specific Utility:
                     u_r(k) = (cw^(1-sigma))/(1-sigma) + psi_r + kappa*(1+theta1*m_j+theta2*n_j+theta3*K_j);
@@ -174,7 +195,7 @@ for t = G.n_period-1:-1:1
                     u_u(k) = (cw^(1-sigma))/(1-sigma) + kappa*(1+theta1*m_j+theta2*n_j+theta3*K_j);
                     
                     % Expected Utility:
-                    EU = max([V_r_next,V_n_next,V_u_next]);
+                    EU = max([V_r_next,V_n_next,V_u_next,Vm_r_next,Vm_n_next, Vm_u_next]);
                     
                     % Sector-Specific Value Functions:
                     V_r(k) = u_r(k) + beta * EU;

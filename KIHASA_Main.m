@@ -143,10 +143,10 @@ G = struct('n_incond',n_incond,'n_period',n_period,'n_shocks',n_shocks,'n_pop',n
 
 %Endogenous
 
-ass_lb = 1;
-ass_up = 5;
-n_ass = 10;
-assets = linspace(ass_lb,ass_up,n_ass);
+assets_lb = 1;
+assets_ub = 5;
+n_assets = 20;
+assets = linspace(assets_lb,assets_ub,n_assets);
 
 matstat = [0 1];
 n_matstat = length(matstat);
@@ -167,23 +167,44 @@ c_vector = linspace(c_min,c_max,c_n);
 
 children = [0 1];
 
-hearn_lb = 1;
-hearn_ub = 5;
-n_hearn = 5;
-hearnings = linspace(hearn_lb,hearn_ub,n_hearn);
+hwages_lb = 1;
+hwages_ub = 5;
+n_hwages = 5;
+hwages = linspace(hwages_lb,hwages_ub,n_hwages);
 
-childHC_lb = 1.1;
-childHC_ub = 4.5;
-n_childHC = 5;
-childHC = linspace(childHC_lb,childHC_ub,n_childHC);
+childK_lb = 1.1;
+childK_ub = 4.5;
+n_childK = 5;
+childK = linspace(childK_lb,childK_ub,n_childK);
 
-SS_K = repmat(childHC',[length(assets)*length(hearnings)*length(workexp)*length(matstat) 1]);
-SS_A = repmat(kron(assets',ones(length(childHC),1)),[length(hearnings)*length(workexp)*length(matstat) 1]);
-SS_H = repmat(kron(hearnings',ones(length(assets)*length(childHC),1)),[length(workexp)*length(matstat) 1]);
-SS_X = repmat(kron(workexp',ones(length(hearnings)*length(assets)*length(childHC),1)),[length(matstat) 1]);
-SS_N = kron(children',ones([length(childHC)*length(assets)*length(hearnings)*length(workexp),1]));
-SS_M = kron(matstat',ones([length(childHC)*length(assets)*length(hearnings)*length(workexp),1]));
+%% SS for linear
 
-SS = [SS_M SS_N SS_X SS_H SS_A SS_K];
+% SS_K = repmat(childHC',[length(assets)*length(hearnings)*length(workexp)*length(matstat) 1]);
+% SS_A = repmat(kron(assets',ones(length(childHC),1)),[length(hearnings)*length(workexp)*length(matstat) 1]);
+% SS_H = repmat(kron(hearnings',ones(length(assets)*length(childHC),1)),[length(workexp)*length(matstat) 1]);
+% SS_X = repmat(kron(workexp',ones(length(hearnings)*length(assets)*length(childHC),1)),[length(matstat) 1]);
+% SS_N = kron(children',ones([length(childHC)*length(assets)*length(hearnings)*length(workexp),1]));
+% SS_M = kron(matstat',ones([length(childHC)*length(assets)*length(hearnings)*length(workexp),1]));
 
-save solutiontest.mat;
+%SS = [SS_M SS_N SS_X SS_H SS_A SS_K];
+
+%% SS for chevyshev
+
+SS_K = repmat(childK',[length(assets)*length(hwages) 1]);
+SS_A = repmat(kron(assets',ones(length(childK),1)),[length(hwages) 1]);
+SS_H = repmat(kron(hwages',ones(length(assets)*length(childK),1)), 1 );
+SS_rows = [SS_H SS_A SS_K]; % rows
+
+SS_X = repmat(workexp, [1 length(matstat)]);
+SS_M = kron(matstat, ones([1, length(workexp)]));
+SS_N = kron(children, ones([1, length(workexp)]));
+SS_cols = [SS_M SS_N SS_X]; % columns
+
+%% Chevyshev Approximation
+
+[z_A,ext_A,extmin_A,extmax_A,d_A,vector_A,T_A,T2_A] = cheby_values(n_assets,assets_ub,assets_lb);
+[z_H,ext_H,extmin_H,extmax_H,d_H,vector_H,T_H,T2_H] = cheby_values(n_hwages,hwages_ub,hwages_lb);
+[z_K,ext_K,extmin_K,extmax_K,d_K,vector_K,T_K,T2_K] = cheby_values(n_childK,assets_ub,assets_lb);
+    
+%% save output
+%save solutiontest.mat;
