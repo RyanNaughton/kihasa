@@ -128,7 +128,7 @@ weight = kron(wt, kron(wt,wt)); % 27x1
 
 n_incond = length(types);
 n_shocks = length(shocks);
-n_period = 25;
+n_period = 20;
 n_pop = 1000;
 
 G = struct('n_incond',n_incond,'n_period',n_period,'n_shocks',n_shocks,'n_pop',n_pop);
@@ -147,7 +147,7 @@ assets_ub = 5;
 n_assets = 20;
 assets = linspace(assets_lb,assets_ub,n_assets);
 
-matstat = [0 1];
+matstat = [1 0];
 n_matstat = length(matstat);
 
 workexp = [1:10];
@@ -157,14 +157,14 @@ n_wrkexp = length(workexp);
 
 sector = [1:3];
 
-c_min = 0;
-c_max = 5;
+% c_min = 0;
+% c_max = 5;
 c_n = 20;
-c_vector = linspace(c_min,c_max,c_n);
+% c_vector = linspace(c_min,c_max,c_n);
 
 %Exogenous
 
-children = [0 1];
+children = [1 0];
 
 hwages_lb = 1;
 hwages_ub = 5;
