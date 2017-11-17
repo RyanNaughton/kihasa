@@ -197,7 +197,7 @@ SS_rows = [SS_H SS_A SS_K]; % rows
 SS_X = repmat(workexp, [1 length(matstat)]);
 SS_M = kron(matstat, ones([1, length(workexp)]));
 SS_N = kron(children, ones([1, length(workexp)]));
-SS_cols = [SS_M SS_N SS_X]; % columns
+SS_cols = [SS_M' SS_N' SS_X']; % columns
 
 %% Chevyshev Approximation
 

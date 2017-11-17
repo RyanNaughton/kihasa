@@ -14,36 +14,35 @@ hhprod = (SS_M+1).^theta1 .* (SS_N+1).^theta2 .* SS_K;
 TVF = assets + wages + hhprod;
 
 tic
-% loop for time (25):
+% loop for time (20):
 for t = G.n_period-1:-1:1
     t
     toc
     if t==G.n_period-1
         Emax = TVF;
+        % Chevyshev Approximation - alpha contains 20 rows of 19x4x4 = 304 coefficients  
+        Num = Emax'*kron(T_A, kron(T_H,T_K)); % numerator (bases*function) 
+        Den = kron(T2_A, kron(T2_H,T2_K)); % square of T multiplied
+        for x = 1:1:(n_matstat*n_wrkexp)
+            alpha(x,:) = Num(x,:)./Den';
+        end
     else
         Emax = W;
         % use 20 new VF (W) to get 20 new coefficients
     end
     
-    % Chevyshev Approximation - MOVE TO IF T==G.N_PERIOD-1
-    Num = Emax'*kron(T_A, kron(T_H,T_K)); % numerator (bases*function) 
-    Den = kron(T2_A, kron(T2_H,T2_K)); % square of T multiplied
-    for x = 1:1:(n_matstat*n_wrkexp)
-        alpha(x,:) = Num(x,:)./Den';
-    end
-    % alpha contains 20 rows of 19x4x4 = 304 coefficients  
     tic
     % loop for shocks (27):
     for i = 1:1:G.n_shocks % 27 x 3
-        i
+        i;
         
         shock_i = shocks_i(i);
         shock_r = shocks_r(i);
         shock_n = shocks_n(i);
         
         % loop for work experience and marital status (20):
-        for x = 1:1:length(SS_rows) %(n_matstat*n_wrkexp)
-            x
+        for x = 1:1:length(SS_cols) % (n_matstat*n_wrkexp)
+            x;
             
             % current state variables:
             m_j = SS_M(x);  % marital status
@@ -51,7 +50,7 @@ for t = G.n_period-1:-1:1
             X_j = SS_X(x);  % experience
          
         % loop over states (20 assets x 5 child HC x 5 husband wages = 500):
-        for j = 1:1:length(SS_rows)
+        for j = 1:1:5 %length(SS_rows)
             j;
             
             % current state variables:
@@ -214,6 +213,7 @@ for t = G.n_period-1:-1:1
         %V_func(:,:,x,t) = V_star;
     end %this becomes end of loop x
     toc
+    
     % Integrate over shocks
     Wm = ;
     Ws = ;
