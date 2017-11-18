@@ -1,4 +1,4 @@
-function [c_func, lr_func, ln_func, lu_func, m_func] = solution(G, types, SS,shocks)
+%function [c_func, lr_func, ln_func, lu_func, m_func] = solution(G, types, SS,shocks)
 
 % loop for initial conditions:
 % for n = 1:1:G.n_incond
@@ -16,7 +16,7 @@ hhprod = (SS_M+1).^theta1 .* (SS_N+1).^theta2 .* SS_K;
 TVF = assets + wages + hhprod;
 tic
 % loop for time (20):
-for t = G.n_period-1:-1:1
+for t = G.n_period-1:-10:1
     t
     toc
     if t==G.n_period-1
@@ -38,7 +38,7 @@ for t = G.n_period-1:-1:1
     end
     
     % loop for work experience and marital status (20):
-    for x = 1:1:length(SS_cols)
+    for x = 1:10:length(SS_cols)
         x;
         
         % current state variables:
@@ -47,7 +47,7 @@ for t = G.n_period-1:-1:1
         X_j = SS_X(x);  % experience
     
         % loop for shocks (27):
-        for i = 1:1:G.n_shocks % 27 x 3
+        for i = 1:9:G.n_shocks % 27 x 3
             i;
         
             shock_i = shocks_i(i);
@@ -55,7 +55,7 @@ for t = G.n_period-1:-1:1
             shock_n = shocks_n(i);
             
             % loop over continuous states (20 assets x 5 child HC x 5 hwages = 500):
-            for j = 1:1:length(SS_rows)
+            for j = 1:100:length(SS_rows)
                 j;
             
                 % current state variables:
@@ -72,33 +72,48 @@ for t = G.n_period-1:-1:1
                 prob_marr_r = (edu + abi + 35 + t)/100; % only change with time & type
                 prob_marr_n = (edu + abi + 30 + t)/100; % only change with time & type
                 prob_marr_u = (edu + abi + 25 + t)/100; % only change with time & type
-                %probability = a0 + a1*col4 + a2*col2 + a3*work + a4*t;
+                %probability = a0*abi + a1*col4 + a2*col2 + a3*work + a4*t;
+                %will be different
             
                 % transitions for exogenous variables:
                 K_next = K_j + inv; % make a function (CES)
                 wh_next = wh_j; % no transition
             
                 % consumption vector
-                chh_max = A_j + (w_j_r + wh_j*m_j + shock_i) - n_j*inv;
-                c_vector = linspace(0,chh_max,c_n); % consumption vector (20)
-            
+                chh_r_min = A_j + (w_j_r + wh_j*m_j + shock_i) - n_j*inv - extmax_A/(1+r);
+                chh_r_max = A_j + (w_j_r + wh_j*m_j + shock_i) - n_j*inv - extmin_A/(1+r);
+                cr_vector = linspace(chh_r_min,chh_r_max,c_n);
+                cr_vector(cr_vector < 0) = 0;
+                chh_n_min = A_j + (w_j_n + wh_j*m_j + shock_i) - n_j*inv - extmax_A/(1+r);
+                chh_n_max = A_j + (w_j_n + wh_j*m_j + shock_i) - n_j*inv - extmin_A/(1+r);
+                cn_vector = linspace(chh_n_min,chh_n_max,c_n);
+                cn_vector(cn_vector < 0) = 0;
+                chh_u_min = A_j + (w_j_u + wh_j*m_j + shock_i) - n_j*inv - extmax_A/(1+r);
+                chh_u_max = A_j + (w_j_u + wh_j*m_j + shock_i) - n_j*inv - extmin_A/(1+r);
+                cu_vector = linspace(chh_u_min,chh_u_max,c_n);
+                cu_vector(cu_vector < 0) = 0;
+                
                 % loop over consumption
-                    for k = 1:1:length(c_vector)
-                        k;
-                
-                        chh = c_vector(k); % HH consumption
-                        cw = 0.5*chh; % woman's consumption
-                
-                        % Sector-Specific Utility:
-                        u_r(k) = (cw^(1-sigma))/(1-sigma) + psi_r + kappa*(1+theta1*m_j+theta2*n_j+theta3*K_j);
-                        u_n(k) = (cw^(1-sigma))/(1-sigma) + psi_n + kappa*(1+theta1*m_j+theta2*n_j+theta3*K_j);
-                        u_u(k) = (cw^(1-sigma))/(1-sigma) + kappa*(1+theta1*m_j+theta2*n_j+theta3*K_j);
-                
+                for k = 1:1:c_n
+                    k;
+                                   
+                    chh_r = cr_vector(k); % HH consumption
+                    chh_n = cn_vector(k);
+                    chh_u = cu_vector(k);
+                    cw_r = 0.5*chh_r; % woman's consumption
+                    cw_n = 0.5*chh_n;
+                    cw_u = 0.5*chh_u;
+                    
+                    % Sector-Specific Utility:
+                    u_r(k) = (cw_r^(1-sigma))/(1-sigma) + psi_r + kappa*(1+theta1*m_j+theta2*n_j+theta3*K_j);
+                    u_n(k) = (cw_n^(1-sigma))/(1-sigma) + psi_n + kappa*(1+theta1*m_j+theta2*n_j+theta3*K_j);
+                    u_u(k) = (cw_u^(1-sigma))/(1-sigma) + kappa*(1+theta1*m_j+theta2*n_j+theta3*K_j);
+                    
                     % married:
                     if x <= 10
                     
                         % regular job:
-                        A_next = (1+r) * (A_j + (w_j_r + wh_j*m_j + shock_i) - chh - n_j*inv); % eq. 8
+                        A_next = (1+r) * (A_j + (w_j_r + wh_j*m_j + shock_i) - chh_r - n_j*inv); % eq. 8
                         x_next = x + 1;
                         if x_next == 11
                             x_next = 10;
@@ -109,7 +124,7 @@ for t = G.n_period-1:-1:1
                         Amr_next(k)=A_next;
                         Vmr_next(k,x)=Vm_r_next;
                         % non-regular job:
-                        A_next = (1+r) * (A_j + (w_j_n + wh_j*m_j + shock_i) - chh - n_j*inv);
+                        A_next = (1+r) * (A_j + (w_j_n + wh_j*m_j + shock_i) - chh_n - n_j*inv);
                         x_next = x + 1;
                         if x_next == 11
                             x_next = 10;
@@ -120,7 +135,7 @@ for t = G.n_period-1:-1:1
                         Amn_next(k)=A_next;
                         Vmn_next(k,x)=Vm_n_next;
                         % unemployed:
-                        A_next = (1+r) * (A_j + (w_j_u + wh_j*m_j + shock_i) - chh - n_j*inv);
+                        A_next = (1+r) * (A_j + (w_j_u + wh_j*m_j + shock_i) - chh_u - n_j*inv);
                         x_next = x;
                         % value function:
                         Base=kron(chebpoly_base(18+1, d_A*(A_next - extmin_A) - 1),kron(chebpoly_base(3+1, d_H*(wh_next - extmin_H) - 1),chebpoly_base(3+1, d_K*(K_next - extmin_K) - 1)));
@@ -131,12 +146,16 @@ for t = G.n_period-1:-1:1
                         Vm_r(k) = u_r(k) + beta * Vm_r_next;
                         Vm_n(k) = u_n(k) + beta * Vm_n_next;
                         Vm_u(k) = u_u(k) + beta * Vm_u_next;
-                    
+                        % save marriage values (for marriage decision)
+                        Vm_r_aux(k,x) = Vm_r(k);
+                        Vm_n_aux(k,x) = Vm_n(k);
+                        Vm_u_aux(k,x) = Vm_u(k);
+                        
                     % Single:
                     else
                         
                         % Regular:
-                        A_next = (1+r) * (A_j + (w_j_r + wh_j*m_j + shock_i) - chh - n_j*inv);
+                        A_next = (1+r) * (A_j + (w_j_r + wh_j*m_j + shock_i) - chh_r - n_j*inv);
                         x_next = x + 1;
                         if x_next == 21
                             x_next = 20;
@@ -144,9 +163,9 @@ for t = G.n_period-1:-1:1
                         Base=kron(chebpoly_base(18+1, d_A*(A_next - extmin_A) - 1),kron(chebpoly_base(3+1, d_H*(wh_next - extmin_H) - 1),chebpoly_base(3+1, d_K*(K_next - extmin_K) - 1)));
                         Vs_r_next = sum(alpha(x_next,:).*Base,2);
                         Asr_next(k)=A_next;
-                    
+                        Vsr_next(k,x)=Vs_r_next;
                         % Non-regular:
-                        A_next = (1+r) * (A_j + (w_j_n + wh_j*m_j + shock_i) - chh - n_j*inv);
+                        A_next = (1+r) * (A_j + (w_j_n + wh_j*m_j + shock_i) - chh_n - n_j*inv);
                         x_next = x + 1;
                         if x_next == 21
                             x_next = 20;
@@ -154,21 +173,21 @@ for t = G.n_period-1:-1:1
                         Base=kron(chebpoly_base(18+1, d_A*(A_next - extmin_A) - 1),kron(chebpoly_base(3+1, d_H*(wh_next - extmin_H) - 1),chebpoly_base(3+1, d_K*(K_next - extmin_K) - 1)));
                         Vs_n_next = sum(alpha(x_next,:).*Base,2);
                         Asn_next(k)=A_next;
-                    
+                        Vsn_next(k,x)=Vs_n_next;
                         % Unemployed:
-                        A_next = (1+r) * (A_j + (w_j_u + wh_j*m_j + shock_i) - chh - n_j*inv);
+                        A_next = (1+r) * (A_j + (w_j_u + wh_j*m_j + shock_i) - chh_u - n_j*inv);
                         x_next = x;
                         Base=kron(chebpoly_base(18+1, d_A*(A_next - extmin_A) - 1),kron(chebpoly_base(3+1, d_H*(wh_next - extmin_H) - 1),chebpoly_base(3+1, d_K*(K_next - extmin_K) - 1)));
                         Vs_u_next = sum(alpha(x_next,:).*Base,2);
                         Asu_next(k)=A_next;
-                        
+                        Vsu_next(k,x)=Vs_u_next;
                         % Sector-Specific Value Functions
-                        Vm_r_next_aux = Vmr_next(k, x-10);
-                        Vm_n_next_aux = Vmn_next(k, x-10);
-                        Vm_u_next_aux = Vmu_next(k, x-10);
-                        Vs_r(k) = u_r(k) + beta * ((1-prob_marr_r)*Vs_r_next + prob_marr_r*Vm_r_next_aux);
-                        Vs_n(k) = u_n(k) + beta * ((1-prob_marr_n)*Vs_n_next + prob_marr_n*Vm_n_next_aux);
-                        Vs_u(k) = u_u(k) + beta * ((1-prob_marr_u)*Vs_u_next + prob_marr_u*Vm_u_next_aux); 
+                        Vs_r(k) = u_r(k) + beta * Vs_r_next;
+                        Vs_n(k) = u_n(k) + beta * Vs_n_next;
+                        Vs_u(k) = u_u(k) + beta * Vs_u_next;
+                        Vsm_r(k) = prob_marr_r*Vm_r_aux(k,x-10) + (1-prob_marr_r)*Vs_r(k);
+                        Vsm_n(k) = prob_marr_n*Vm_n_aux(k,x-10) + (1-prob_marr_n)*Vs_n(k);
+                        Vsm_u(k) = prob_marr_u*Vm_u_aux(k,x-10) + (1-prob_marr_u)*Vs_u(k);
                     end
                     end
 
@@ -185,15 +204,11 @@ for t = G.n_period-1:-1:1
                     [Vm_r_star, Index_mr_k] = max(Vm_r);
                     [Vm_n_star, Index_mn_k] = max(Vm_n);
                     [Vm_u_star, Index_mu_k] = max(Vm_u);
-                    cm_r_star = c_vector(Index_mr_k);
-                    cm_n_star = c_vector(Index_mn_k);
-                    cm_u_star = c_vector(Index_mu_k);
+                    cm_r_star = cr_vector(Index_mr_k);
+                    cm_n_star = cn_vector(Index_mn_k);
+                    cm_u_star = cu_vector(Index_mu_k);
                     cm_star_aux = [cm_r_star, cm_n_star, cm_u_star];
                     [Vm_star, Index_lm] = max([Vm_r_star,Vm_n_star,Vm_u_star]);
-                    % save marriage values for all 10 years of experience
-                    Vmr_star(x) = Vm_r_star;
-                    Vmn_star(x) = Vm_n_star;
-                    Vmu_star(x) = Vm_u_star;
                 else
                     % check
                     Vs_r(Asr_next < extmin_A) = NaN;
@@ -206,14 +221,17 @@ for t = G.n_period-1:-1:1
                     [Vs_r_star, Index_sr_k] = max(Vs_r);
                     [Vs_n_star, Index_sn_k] = max(Vs_n);
                     [Vs_u_star, Index_su_k] = max(Vs_u);
-                    cs_r_star = c_vector(Index_sr_k);
-                    cs_n_star = c_vector(Index_sn_k);
-                    cs_u_star = c_vector(Index_su_k);
-                    cs_star_aux = [cm_r_star, cm_n_star, cm_u_star, cs_r_star, cs_n_star, cs_u_star];
-                    Vm_r_star_aux = Vmr_star(x-10);
-                    Vm_n_star_aux = Vmn_star(x-10);
-                    Vm_u_star_aux = Vmu_star(x-10);
-                    [Vs_star, Index_ls] = max([Vm_r_star_aux, Vm_n_star_aux, Vm_u_star_aux, Vs_r_star, Vs_n_star, Vs_u_star]);
+                    [Vsm_r_star, Index_smr_k] = max(Vsm_r);
+                    [Vsm_n_star, Index_smn_k] = max(Vsm_n);
+                    [Vsm_u_star, Index_smu_k] = max(Vsm_u);
+                    cs_r_star = cr_vector(Index_sr_k);
+                    cs_n_star = cn_vector(Index_sn_k);
+                    cs_u_star = cu_vector(Index_su_k);
+                    csm_r_star = cr_vector(Index_smr_k);
+                    csm_n_star = cn_vector(Index_smn_k);
+                    csm_u_star = cu_vector(Index_smu_k);
+                    cs_star_aux = [csm_r_star, csm_n_star, csm_u_star, cs_r_star, cs_n_star, cs_u_star];
+                    [Vs_star, Index_ls] = max([Vsm_r_star, Vsm_n_star, Vsm_u_star, Vs_r_star, Vs_n_star, Vs_u_star]);
                 end
             % save choice:
             if x <= 10
@@ -246,5 +264,6 @@ lu_func = l_func == 3 | l_func == 6;
 % between 1-3
 m_func = l_func == 1 | l_func == 2 | l_func == 3;
 
-end
+%end
+
 %% 5 funcs: consumption, regular, non-regular, unemployed, and marriage
