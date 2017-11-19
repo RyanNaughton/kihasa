@@ -1,19 +1,19 @@
-%function [c_func, lr_func, ln_func, lu_func, m_func] = solution(G, types, SS,shocks)
+function [c_func, lr_func, ln_func, lu_func, m_func] = solution(G,abi,edu,S,shocks)
 
 % loop for initial conditions:
 % for n = 1:1:G.n_incond
-n=1;
-     abi = types(n,1);
-     edu = types(n,2);
+% n=1;
+%      abi = types(n,1);
+%      edu = types(n,2);
 
-% Terminal Value Function:
-% TVF = A_T + W_T + Q_T = assets + wages + HH_production
+% Terminal Value Function: TVF = A_T + W_T + Q_T = assets + wages + HH_prod
 
-assets = SS_A; 
-wages = exp(alpha1*SS_X + alpha2*edu + abi);
-hhprod = (SS_M+1).^theta1 .* (SS_N+1).^theta2 .* SS_K;
-% matrix of J=10x5x5=500 rows and 10x2=20 cols
-TVF = assets + wages + hhprod;
+    assets = SS_A; 
+    wages = exp(alpha1*SS_X + alpha2*edu + abi);
+    hhprod = (SS_M+1).^theta1 .* (SS_N+1).^theta2 .* SS_K;
+    % matrix of J=10x5x5=500 rows and 10x2=20 cols
+    TVF = assets + wages + hhprod;
+    
 tic
 % loop for time (20):
 for t = G.n_period-1:-10:1
@@ -47,7 +47,7 @@ for t = G.n_period-1:-10:1
         X_j = SS_X(x);  % experience
     
         % loop for shocks (27):
-        for i = 1:9:G.n_shocks % 27 x 3
+        for i = 1:1:G.n_shocks % 27 x 3
             i;
         
             shock_i = shocks_i(i);
@@ -55,7 +55,7 @@ for t = G.n_period-1:-10:1
             shock_n = shocks_n(i);
             
             % loop over continuous states (20 assets x 5 child HC x 5 hwages = 500):
-            for j = 1:100:length(SS_rows)
+            for j = 1:1:5 %00:length(SS_rows)
                 j;
             
                 % current state variables:
@@ -76,7 +76,7 @@ for t = G.n_period-1:-10:1
                 %will be different
             
                 % transitions for exogenous variables:
-                K_next = K_j + inv; % make a function (CES)
+                K_next = (gamma1*K_j^phi + (1-gamma1)*inv^phi)^(1/phi); % make a function (CES)
                 wh_next = wh_j; % no transition
             
                 % consumption vector
@@ -96,11 +96,13 @@ for t = G.n_period-1:-10:1
                 % loop over consumption
                 for k = 1:1:c_n
                     k;
-                                   
-                    chh_r = cr_vector(k); % HH consumption
+                    
+                    % HH consumption
+                    chh_r = cr_vector(k);
                     chh_n = cn_vector(k);
                     chh_u = cu_vector(k);
-                    cw_r = 0.5*chh_r; % woman's consumption
+                    % woman's consumption
+                    cw_r = 0.5*chh_r;
                     cw_n = 0.5*chh_n;
                     cw_u = 0.5*chh_u;
                     
@@ -243,6 +245,17 @@ for t = G.n_period-1:-10:1
                 l_star(j, i, x, t) = Index_ls;
                 V_star(j, i, x, t) = Vs_star;
             end
+            
+            % save the number assets outside grid
+            if x <= 10
+                Ar_out(j,i,x,t) = sum(Amr_next < extmin_A) + sum(Amr_next > extmax_A);
+                An_out(j,i,x,t) = sum(Amn_next < extmin_A) + sum(Amn_next > extmax_A);
+                Au_out(j,i,x,t) = sum(Amu_next < extmin_A) + sum(Amu_next > extmax_A);
+            else
+                Ar_out(j,i,x,t) = sum(Asr_next < extmin_A) + sum(Asr_next > extmax_A);
+                An_out(j,i,x,t) = sum(Asn_next < extmin_A) + sum(Asn_next > extmax_A);
+                Au_out(j,i,x,t) = sum(Asu_next < extmin_A) + sum(Asu_next > extmax_A);
+            end
             end
         end
         
@@ -260,10 +273,8 @@ lr_func = l_func == 1 | l_func == 4;
 ln_func = l_func == 2 | l_func == 5;
 lu_func = l_func == 3 | l_func == 6;
 
-% marriage function for single women (will be 1 if their labor choice is
-% between 1-3
+% marriage function for single women: equals 1 if labor choice is 1, 2, or 3
 m_func = l_func == 1 | l_func == 2 | l_func == 3;
 
-%end
-
+end
 %% 5 funcs: consumption, regular, non-regular, unemployed, and marriage

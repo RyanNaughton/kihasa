@@ -6,26 +6,27 @@ clear all; clc;
 
 %% Structural Parameters
 
-%Family Background
-famb1=0.3; %delta1
-famb2=0.3; %delta2
+% EDUCATION STAGE
+% %Family Background
+% famb1=0.3; %delta1
+% famb2=0.3; %delta2
+% 
+% %Parental Income Shocks by Age 14
+% pincshocks=0.3; %delta3
+% 
+% %Private Expenditures in Schooling
+% pexpschool=4; %delta4
+% 
+% %SD of Shocks
+% sd_shock=sqrt(0.5);
 
-%Parental Income Shocks by Age 14
-pincshocks=0.3; %delta3
-
-%Private Expenditures in Schooling
-pexpschool=4; %delta4
-
-%SD of Shocks
-sd_shock=sqrt(0.5);
-
+% ADULT STAGE
 %Utility of Consumption
 sigma=0.4;
 
 %Disutility of work by Sector
-psi_r=0.4;
-psi_n=0.4;
-%unemployed?
+psi_r=-0.6;
+psi_n=-0.8;
 
 %MRS of HH production wrt consumption/leisure
 kappa=0.5;
@@ -40,11 +41,9 @@ theta2=0.3;
 theta3=0.4;
 
 %Child HC Production Function
-gamma1=0.3;
-gamma2=0.2;
-gamma3=0.2;
-phi=0.4;
-rho=0.3;
+gamma1=0.6;
+phi=0.5;
+
 
 %Female Share of Consumption
 delta1=0.3;
@@ -204,6 +203,18 @@ SS_cols = [SS_M' SS_N' SS_X']; % columns
 [z_A,ext_A,extmin_A,extmax_A,d_A,vector_A,T_A,T2_A] = cheby_values(n_assets,assets_ub,assets_lb);
 [z_H,ext_H,extmin_H,extmax_H,d_H,vector_H,T_H,T2_H] = cheby_values(n_hwages,hwages_ub,hwages_lb);
 [z_K,ext_K,extmin_K,extmax_K,d_K,vector_K,T_K,T2_K] = cheby_values(n_childK,assets_ub,assets_lb);
-    
+
+% Basis for Income Shocks
+zeps_r= 2*(eps_r-eps_r(1))/(eps_r(Ne,1)-eps_r(1))-1; 
+zeps_n= 2*(eps_n-eps_n(1))/(eps_n(Ne,1)-eps_n(1))-1; 
+zeps_u= 2*(eps_u-eps_u(1))/(eps_u(Ne,1)-eps_u(1))-1; 
+Teps_r=chebpoly_base(Ne-1,zeps_r);
+Teps_n=chebpoly_base(Ne-1,zeps_n);
+Teps_u=chebpoly_base(Ne-1,zeps_u);
+T2eps_r = diag(Teps_r'*Teps_r);
+T2eps_n = diag(Teps_n'*Teps_n);
+T2eps_u = diag(Teps_u'*Teps_u);   
+
+ 
 %% save output
 %save solutiontest.mat;
