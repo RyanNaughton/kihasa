@@ -1,22 +1,56 @@
-function [c_func, lr_func, ln_func, lu_func, m_func] = solution(G,abi,edu,S,shocks)
+function [c_func, lr_func, ln_func, lu_func, m_func] = solution(G,abi,edu,S)
+
+% Index for parameters
+
+psi_r=params(1);
+psi_n=params(2);
+theta1_r=params(3);
+theta1_n=params(4);
+theta1_u=params(5);
+theta3_r=params(6);
+theta3_n=params(7);
+theta3_u=params(8);
+gamma1=params(9);
+phi=params(10);
+alpha0_r=params(11);
+alpha0_n=params(12);
+alpha11_n=params(13);
+alpha11_r=params(14);
+alpha12_n=params(15);
+alpha12_r=params(16);
+alpha2_r=params(17);
+alpha2_n=params(18);
+sigma_r = params(19);
+sigma_n = params(20);
+sigma_i = params(21); 
+omega0_w = params(22); 
+omega0_u = params(23); 
+omega11  = params(24);
+omega12  = params(25);
+omega2 = params(26);
+lambda1=params(27);
+lambda2=params(28);
+lambda3=params(29);
 
 % loop for initial conditions:
 % for n = 1:1:G.n_incond
-% n=1;
-%      abi = types(n,1);
-%      edu = types(n,2);
+n=1;
+     abi = types(n,1);
+     edu = types(n,2);
 
 % Terminal Value Function: TVF = A_T + W_T + Q_T = assets + wages + HH_prod
 
     assets = SS_A; 
-    wages = exp(alpha1*SS_X + alpha2*edu + abi);
+    wage_r =exp(alpha0_r*(abi==2) + alpha11_r*(edu==2) + alpha12_r*(edu==3) + alpha2_r*log(1+SS_X));
+    wage_n =exp(alpha0_n*(abi==2) + alpha11_n*(edu==2) + alpha12_n*(edu==3) + alpha2_n*log(1+SS_X));
+    wages= 0.5*wage_r + 0.5*wage_n;
     hhprod = (SS_M+1).^theta1 .* (SS_N+1).^theta2 .* SS_K;
     % matrix of J=10x5x5=500 rows and 10x2=20 cols
-    TVF = assets + wages + hhprod;
+    TVF = lambda1*assets + lambda2*wages + lambda3*hhprod;
     
 tic
 % loop for time (20):
-for t = G.n_period-1:-10:1
+for t = G.n_period-1:-1:1
     t
     toc
     if t==G.n_period-1
@@ -28,7 +62,7 @@ for t = G.n_period-1:-10:1
             alpha(x,:) = Num(x,:)./Den';
         end
     else
-        Emax = W(t+1);
+        Emax = W(:,:,t+1);
         % use 20 new VF (W) to get 20 new coefficients
         Num = Emax'*kron(T_A, kron(T_H,T_K));
         Den = kron(T2_A, kron(T2_H,T2_K));
@@ -38,8 +72,8 @@ for t = G.n_period-1:-10:1
     end
     
     % loop for work experience and marital status (20):
-    for x = 1:10:length(SS_cols)
-        x;
+    for x = 1:1:length(SS_cols)
+        x
         
         % current state variables:
         m_j = SS_M(x);  % marital status
@@ -48,14 +82,14 @@ for t = G.n_period-1:-10:1
     
         % loop for shocks (27):
         for i = 1:1:G.n_shocks % 27 x 3
-            i;
+            i
         
             shock_i = shocks_i(i);
             shock_r = shocks_r(i);
             shock_n = shocks_n(i);
             
             % loop over continuous states (20 assets x 5 child HC x 5 hwages = 500):
-            for j = 1:1:5 %00:length(SS_rows)
+            for j = 1:1:length(SS_rows)
                 j;
             
                 % current state variables:
@@ -64,17 +98,19 @@ for t = G.n_period-1:-10:1
                 K_j = SS_K(j);  % HC of child
             
                 % sector-specific state variables:
-                w_j_r = exp(alpha1*X_j + alpha2*edu + abi + shock_r); % same
-                w_j_n = exp(alpha1*X_j + alpha2*edu + abi + shock_n); % same
+                w_j_r = exp(alpha01_r*(abi==2) + alpha11_r*(edu==2) + alpha12_r*(edu==3) + alpha2_r*log(1+X_j) + shock_r); % same
+                w_j_n = exp(alpha01_n*(abi==2) + alpha11_n*(edu==2) + alpha12_n*(edu==3) + alpha2_n*log(1+X_j) + shock_n); % same  
                 w_j_u = 0; % unemployed women don't have earnings?
+                
               
                 % sector-specific probabilities: % CHECK THIS WHEN AGE VARIES
-                prob_marr_r = (edu + abi + 35 + t)/100; % only change with time & type
-                prob_marr_n = (edu + abi + 30 + t)/100; % only change with time & type
-                prob_marr_u = (edu + abi + 25 + t)/100; % only change with time & type
+%                 prob_marr_r = (edu + abi + 35 + t)/100; % only change with time & type
+%                 prob_marr_n = (edu + abi + 30 + t)/100; % only change with time & type
+%                 prob_marr_u = (edu + abi + 25 + t)/100; % only change with time & type
                 %probability = a0*abi + a1*col4 + a2*col2 + a3*work + a4*t;
-                %will be different
-            
+                prob_marr_w = 0.3349 - 0.0581*(edu==2) - 0.0904*(edu==3) + 0.0152*t;
+                prob_marr_u = 0.401  - 0.0581*(edu==2) - 0.0904*(edu==3) + 0.0152*t;
+                
                 % transitions for exogenous variables:
                 K_next = (gamma1*K_j^phi + (1-gamma1)*inv^phi)^(1/phi); % make a function (CES)
                 wh_next = wh_j; % no transition
@@ -107,9 +143,9 @@ for t = G.n_period-1:-10:1
                     cw_u = 0.5*chh_u;
                     
                     % Sector-Specific Utility:
-                    u_r(k) = (cw_r^(1-sigma))/(1-sigma) + psi_r + kappa*(1+theta1*m_j+theta2*n_j+theta3*K_j);
-                    u_n(k) = (cw_n^(1-sigma))/(1-sigma) + psi_n + kappa*(1+theta1*m_j+theta2*n_j+theta3*K_j);
-                    u_u(k) = (cw_u^(1-sigma))/(1-sigma) + kappa*(1+theta1*m_j+theta2*n_j+theta3*K_j);
+                    u_r(k) = (cw_r^(1-sigma))/(1-sigma) + psi_r + theta1_r*log(1+m_j) + theta3_r*logK_j;
+                    u_n(k) = (cw_n^(1-sigma))/(1-sigma) + psi_n + theta1_n*log(1+m_j) + theta3_n*logK_j;
+                    u_u(k) = (cw_u^(1-sigma))/(1-sigma) + theta1_u*log(1+m_j) + theta3_u*logK_j;
                     
                     % married:
                     if x <= 10
@@ -187,8 +223,8 @@ for t = G.n_period-1:-10:1
                         Vs_r(k) = u_r(k) + beta * Vs_r_next;
                         Vs_n(k) = u_n(k) + beta * Vs_n_next;
                         Vs_u(k) = u_u(k) + beta * Vs_u_next;
-                        Vsm_r(k) = prob_marr_r*Vm_r_aux(k,x-10) + (1-prob_marr_r)*Vs_r(k);
-                        Vsm_n(k) = prob_marr_n*Vm_n_aux(k,x-10) + (1-prob_marr_n)*Vs_n(k);
+                        Vsm_r(k) = prob_marr_w*Vm_r_aux(k,x-10) + (1-prob_marr_w)*Vs_r(k);
+                        Vsm_n(k) = prob_marr_w*Vm_n_aux(k,x-10) + (1-prob_marr_w)*Vs_n(k);
                         Vsm_u(k) = prob_marr_u*Vm_u_aux(k,x-10) + (1-prob_marr_u)*Vs_u(k);
                     end
                     end
@@ -276,5 +312,5 @@ lu_func = l_func == 3 | l_func == 6;
 % marriage function for single women: equals 1 if labor choice is 1, 2, or 3
 m_func = l_func == 1 | l_func == 2 | l_func == 3;
 
-end
+%end
 %% 5 funcs: consumption, regular, non-regular, unemployed, and marriage
