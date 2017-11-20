@@ -1,4 +1,4 @@
-function [z,ext,extmin,extmax,d,vector,T,T2] = cheby_values(n,ub,lb)
+function [ncheby,extmin,extmax,d,T,T2] = cheby_values(n,ub,lb)
     
     % points
     M = n;

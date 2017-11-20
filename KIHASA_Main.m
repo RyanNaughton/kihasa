@@ -7,6 +7,7 @@ clear all; clc;
 %% Structural Parameters
 
 % EDUCATION STAGE
+
 % %Family Background
 % famb1=0.3; %delta1
 % famb2=0.3; %delta2
@@ -31,13 +32,13 @@ theta1_r=0.2;
 theta1_n=0.25;
 theta1_u=0.4;
 
-% %Value of Child HC in HH Production (6-8)
+%Value of Child HC in HH Production (6-8)
 theta3_r=0.3;
 theta3_n=0.3;
 theta3_u=0.3;
 theta=[theta1_r;theta1_n;theta1_u;theta3_r;theta3_n;theta3_u];
 
-%Child HC Production Function (table 3, CGST_Oct82015)  (9-10)
+%Child HC Production Function [table 3, CGST_Oct82015] (9-10)
 gamma1=0.5595;
 phi=0.4282;
 
@@ -46,8 +47,8 @@ phi=0.4282;
 % delta2=0.3;
 
 %Family Background Types (11-12)
-alpha0_r=0.0995;
-alpha0_n=0.0115;
+alpha01_r=0.0995;
+alpha01_n=0.0115;
 
 %Return to 2yr College (13-14)
 alpha11_n=0.116;
@@ -61,15 +62,14 @@ alpha12_r=0.174;
 alpha2_r=0.437;
 alpha2_n=0.302;
 %unemployed?
-alpha=[alpha0_r;alpha0_n;alpha11_r;alpha11_n;alpha12_r;alpha12_n;alpha2_r;alpha2_n];
+alpha=[alpha01_r;alpha01_n;alpha11_r;alpha11_n;alpha12_r;alpha12_n;alpha2_r;alpha2_n];
 
 % Shocks (19-21)
 sigma_r = 0.43; %shock to regular
 sigma_n = 0.73; %shock to non-regular
-sigma_i = 245; %shock to hh income 245
+sigma_i = 0.5; %245; %shock to hh income
 
 % Probability of marriage (22-26)
-
 omega0_w  =  0.3349; 
 omega0_u  =  0.401; 
 omega11 = - 0.0581;
@@ -107,21 +107,27 @@ beta=0.95;
 %Interest rate
 r=0.07;
 %Investment in Children
-inv=1;
+Inv=1;
 % state parameters
 n_incond = length(types);
 n_shocks = 27;
 n_period = 20;
 n_pop = 1000;
+n_cons = 20;
+n_wrkexp = 10;
+n_matstat = 2;
 
-G = struct('Ne',Ne,'sigma',sigma,'beta',beta,'r',r,'inv',inv,'n_incond',n_incond,'n_period',n_period,'n_shocks',n_shocks,'n_pop',n_pop);
+G = struct('Ne',Ne,'sigma',sigma,'beta',beta,'r',r,'Inv',Inv,...
+    'n_incond',n_incond,'n_period',n_period,'n_shocks',n_shocks,...
+    'n_pop',n_pop,'n_cons',n_cons,'n_wrkexp',n_wrkexp,'n_matstat',n_matstat);
 
 
 %% Test Functions
 tic;
-S = sspace(params,G);
+S = sspace(params0,G);
+toc
 for z=1:n_incond
-    [C(:,:,:,z),R(:,:,:,z),N(:,:,:,z),U(:,:,:,z),M(:,:,:,z)] = solution(G,types(z,1),types(z,2),S); 
+    [C(:,:,:,z),R(:,:,:,z),N(:,:,:,z),U(:,:,:,z),M(:,:,:,z)] = solution(G,types(z,1),types(z,2),S,params0); 
 end
 toc;
 [alpC(:,:,:,z),alpR(:,:,:,z),alpT(:,:,:,z),alpU(:,:,:,z),alpM(:,:,:,z)]=thci_polfunc(C(:,:,:,z),R(:,:,:,z),N(:,:,:,z),U(:,:,:,z),M(:,:,:,z),S,G);

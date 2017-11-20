@@ -16,32 +16,23 @@ shocks_i = kron(eps_i,ones(length(eps_n)*length(eps_r),1));
 shocks_r = repmat(kron(eps_r,ones(length(eps_n),1)),[length(eps_i) 1]);
 shocks_n = repmat(eps_n,[length(eps_i)*length(eps_r) 1]);
 
-shocks = [shocks_i shocks_r shocks_n];
+%shocks = [shocks_i shocks_r shocks_n];
 weight = kron(wt, kron(wt,wt)); % 27x1
 
 %% State Space
 
 %Endogenous
 
+matstat = [1 0];
+
+workexp = [1:10];
+% workexp_r = [1:3];
+% workexp_n = [1:3];
+
 assets_lb = 1;
 assets_ub = 5;
 n_assets = 20;
 assets = linspace(assets_lb,assets_ub,n_assets);
-
-matstat = [1 0];
-n_matstat = length(matstat);
-
-workexp = [1:10];
-workexp_r = [1:3];
-workexp_n = [1:3];
-n_wrkexp = length(workexp);
-
-sector = [1:3];
-
-% c_min = 0;
-% c_max = 5;
-c_n = 20;
-% c_vector = linspace(c_min,c_max,c_n);
 
 %Exogenous
 
@@ -82,9 +73,9 @@ SS_cols = [SS_M' SS_N' SS_X']; % columns
 
 %% Chevyshev Approximation
 
-[z_A,ext_A,extmin_A,extmax_A,d_A,vector_A,T_A,T2_A] = cheby_values(n_assets,assets_ub,assets_lb);
-[z_H,ext_H,extmin_H,extmax_H,d_H,vector_H,T_H,T2_H] = cheby_values(n_hwages,hwages_ub,hwages_lb);
-[z_K,ext_K,extmin_K,extmax_K,d_K,vector_K,T_K,T2_K] = cheby_values(n_childK,assets_ub,assets_lb);
+[nA,extmin_A,extmax_A,d_A,T_A,T2_A] = cheby_values(n_assets,assets_ub,assets_lb);
+[nH,extmin_H,extmax_H,d_H,T_H,T2_H] = cheby_values(n_hwages,hwages_ub,hwages_lb);
+[nK,extmin_K,extmax_K,d_K,T_K,T2_K] = cheby_values(n_childK,assets_ub,assets_lb);
 
 % Basis for Income Shocks
 % zeps_r= 2*(eps_r-eps_r(1))/(eps_r(Ne,1)-eps_r(1))-1; 
@@ -97,8 +88,10 @@ SS_cols = [SS_M' SS_N' SS_X']; % columns
 % T2eps_n = diag(Teps_n'*Teps_n);
 % T2eps_i = diag(Teps_i'*Teps_i);   
 
-S = struct('Ne',Ne,'sigma',sigma,'beta',beta,'r',r,'inv',inv,'n_incond',n_incond,'n_period',n_period,'n_shocks',n_shocks,'n_pop',n_pop);
-
-
+S = struct('SS_K',SS_K,'SS_A',SS_A,'SS_H',SS_H,'SS_X',SS_X,'SS_M',SS_M,'SS_N',SS_N,...
+    'shocks_i',shocks_i,'shocks_r',shocks_r,'shocks_n',shocks_n,'weight',weight,...
+    'nA',nA,'extmin_A',extmin_A,'extmax_A',extmax_A,'d_A',d_A,'T_A',T_A,'T2_A',T2_A,...
+    'nH',nH,'extmin_H',extmin_H,'extmax_H',extmax_H,'d_H',d_H,'T_H',T_H,'T2_H',T2_H,...
+    'nK',nK,'extmin_K',extmin_K,'extmax_K',extmax_K,'d_K',d_K,'T_K',T_K,'T2_K',T2_K);
 
 end
