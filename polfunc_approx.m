@@ -1,8 +1,7 @@
 
-function [alpC,alpR,alpT,alpU,alpM]=thci_polfunc(C,R,T,U,M,S,G)
+function [alpC,alpR,alpT,alpU,alpM]=polfunc_approx(C,R,N,U,M,S,G)
 
-
-T_sim=kron(S.T_A, kron(S.T_H,kron(S.T_K,kron(S.Teps_r,kron(S.Teps_n,S.Teps_u)))));
+T_sim=kron(S.T_A, kron(S.T_H,kron(S.T_K,kron(S.Teps_r,kron(S.Teps_n,S.Teps_i)))));
 Den= kron(S.T2_A, kron(S.T2_H,kron(S.T2_K,kron(S.T2eps_r,kron(S.T2eps_n,S.T2eps_u)))));
 
 %%% Polynomial Bases and Derivatives %%%% 
@@ -14,8 +13,8 @@ for t=1:1:G.nper
 	alpC(:,x,t) = NumC(:,x,t)./Den';
 	NumR(:,x,t) = R(:,x,t)'*T_sim; 
 	alpR(:,x,t) = NumR(:,x,t)./Den';
-	NumT(:,x,t) = T(:,x,t)'*T_sim; 
-	alpT(:,x,t) = NumT(:,x,t)./Den';
+	NumN(:,x,t) = N(:,x,t)'*T_sim; 
+	alpN(:,x,t) = NumN(:,x,t)./Den';
 	NumU(:,x,t) = U(:,x,t)'*T_sim; 
 	alpU(:,x,t) = NumU(:,x,t)./Den';
 	NumM(:,x,t) = M(:,x,t)'*T_sim; 

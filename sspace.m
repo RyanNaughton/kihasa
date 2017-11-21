@@ -25,7 +25,7 @@ weight = kron(wt, kron(wt,wt)); % 27x1
 
 matstat = [1 0];
 
-workexp = [1:10];
+workexp = [0:9];
 % workexp_r = [1:3];
 % workexp_n = [1:3];
 
@@ -38,8 +38,8 @@ assets = linspace(assets_lb,assets_ub,n_assets);
 
 children = [1 0];
 
-hwages_lb = 1;
-hwages_ub = 5;
+hwages_lb = 100;
+hwages_ub = 1200;
 n_hwages = 5;
 hwages = linspace(hwages_lb,hwages_ub,n_hwages);
 

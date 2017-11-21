@@ -117,23 +117,42 @@ n_cons = 20;
 n_wrkexp = 10;
 n_matstat = 2;
 
+Eps=randn(3,n_pop,n_period);
+
 G = struct('Ne',Ne,'sigma',sigma,'beta',beta,'r',r,'Inv',Inv,...
     'n_incond',n_incond,'n_period',n_period,'n_shocks',n_shocks,...
-    'n_pop',n_pop,'n_cons',n_cons,'n_wrkexp',n_wrkexp,'n_matstat',n_matstat);
+    'n_pop',n_pop,'n_cons',n_cons,'n_wrkexp',n_wrkexp,'n_matstat',n_matstat,'Eps',Eps);
 
+
+%% Drawing Types
+
+for n=1:1:G.npop
+        if rand<params(20)
+            k(n,1)=1;
+        else
+            k(n,1)=2;
+        end
+end
+type=XX;
 
 %% Test Functions
 tic;
 S = sspace(params0,G);
-toc
 for z=1:n_incond
     [C(:,:,:,z),R(:,:,:,z),N(:,:,:,z),U(:,:,:,z),M(:,:,:,z)] = solution(G,types(z,1),types(z,2),S,params0); 
 end
 toc;
-[alpC(:,:,:,z),alpR(:,:,:,z),alpT(:,:,:,z),alpU(:,:,:,z),alpM(:,:,:,z)]=thci_polfunc(C(:,:,:,z),R(:,:,:,z),N(:,:,:,z),U(:,:,:,z),M(:,:,:,z),S,G);
+
+tic;
+for z=1:n_incond
+[alpC(:,:,:,z),alpR(:,:,:,z),alpN(:,:,:,z),alpU(:,:,:,z),alpM(:,:,:,z)]=polfunc_approx(C(:,:,:,z),R(:,:,:,z),N(:,:,:,z),U(:,:,:,z),M(:,:,:,z),S,G);
+end
+toc;
 
 
 
- 
+
+
+
 %% save output
 %save solutiontest.mat;
