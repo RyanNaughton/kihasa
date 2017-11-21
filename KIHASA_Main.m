@@ -126,19 +126,22 @@ G = struct('Ne',Ne,'sigma',sigma,'beta',beta,'r',r,'Inv',Inv,...
 
 %% Drawing Types
 
-for n=1:1:G.npop
-        if rand<params(20)
+for n=1:1:G.n_pop
+        if rand<params0(20)
             k(n,1)=1;
         else
             k(n,1)=2;
         end
 end
-type=XX;
+%% type=XX;
+
+fprintf('foo\n');
 
 %% Test Functions
 tic;
 S = sspace(params0,G);
 for z=1:n_incond
+    fprintf('foo\n')
     [C(:,:,:,z),R(:,:,:,z),N(:,:,:,z),U(:,:,:,z),M(:,:,:,z)] = solution(G,types(z,1),types(z,2),S,params0); 
 end
 toc;

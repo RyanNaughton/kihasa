@@ -1,4 +1,4 @@
-function [x, w] = GaussHermite_2(n)
+function [x, w] = GaussHermite(n)
 
 % This function determines the abscisas (x) and weights (w) for the
 % Gauss-Hermite quadrature of order n>1, on the interval [-INF, +INF].
